@@ -1,0 +1,8 @@
+{
+  "include": [
+    "ai-services"
+  ],
+  "extraPaths": [
+    "ai-services"
+  ]
+}

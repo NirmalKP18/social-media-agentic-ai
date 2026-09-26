@@ -2,10 +2,16 @@
 
 from typing import Any
 
-from ..analysis_agent.schemas import Analysis
-from ..base import Agent
-from ..collection_agent.schemas import Post
-from ..retrieval_agent.schemas import Evidence
+try:
+    from agents.analysis_agent.schemas import Analysis
+    from agents.base import Agent
+    from agents.collection_agent.schemas import Post
+    from agents.retrieval_agent.schemas import Evidence
+except ImportError:
+    from ..analysis_agent.schemas import Analysis
+    from ..base import Agent
+    from ..collection_agent.schemas import Post
+    from ..retrieval_agent.schemas import Evidence
 from .response_builder import build_response
 
 

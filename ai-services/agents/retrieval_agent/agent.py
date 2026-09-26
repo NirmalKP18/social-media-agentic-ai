@@ -1,8 +1,12 @@
 """Retrieval agent: ranks posts and knowledge-base chunks against a query."""
 
 import settings
-from ..base import Agent
-from ..collection_agent.schemas import Post
+try:
+    from agents.base import Agent
+    from agents.collection_agent.schemas import Post
+except ImportError:
+    from ..base import Agent
+    from ..collection_agent.schemas import Post
 from .retriever import Retriever
 from .schemas import Evidence
 

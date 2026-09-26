@@ -1,7 +1,11 @@
 """NLP analysis agent: sentiment, emotion, topics, entities, priority, and summaries."""
 
-from ..base import Agent
-from ..collection_agent.schemas import Post
+try:
+    from agents.base import Agent
+    from agents.collection_agent.schemas import Post
+except ImportError:
+    from ..base import Agent
+    from ..collection_agent.schemas import Post
 from .classifier import extract_topics, summarize, tokenize
 from .emotion import detect_emotions
 from .intent import classify_intent

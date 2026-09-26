@@ -3,7 +3,10 @@
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from ..base import Agent
+try:
+    from agents.base import Agent
+except ImportError:
+    from ..base import Agent
 from .cleaner import (
     TEXT_LIMIT,
     clean_text,
