@@ -1,0 +1,13 @@
+"""Rejects missing or repeated post identifiers during normalization."""
+
+
+class Deduplicator:
+    def __init__(self) -> None:
+        self._seen: set[str] = set()
+
+    def register(self, post_id: str, index: int) -> None:
+        if not post_id:
+            raise ValueError(f"Post at index {index} has no id")
+        if post_id in self._seen:
+            raise ValueError(f"Duplicate post id: {post_id}")
+        self._seen.add(post_id)
