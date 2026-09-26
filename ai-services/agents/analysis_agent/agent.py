@@ -89,13 +89,17 @@ class AnalysisAgent(Agent):
             priority.score = max(priority.score, 85)
             priority.factors.append("High comment backlash and multiple customer complaints detected")
 
+        intent_obj = main["intent"]
+        intent_str = intent_obj.primary if hasattr(intent_obj, "primary") else str(intent_obj)
+
         return Analysis(
             post.id,
             main["sentiment"],
             main["topics"],
             main["entities"],
             main["summary"],
-            intent=main["intent"],
+            intent=intent_str,
+            intent_detail=intent_obj if hasattr(intent_obj, "primary") else None,
             emotion=main["emotion"],
             priority=priority,
             named_entities=main["named_entities"],

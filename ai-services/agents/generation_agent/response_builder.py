@@ -23,7 +23,7 @@ def build_response(
     sentiment_distribution = Counter(item.sentiment.label for item in analyses)
     priority_distribution = Counter(item.priority.level for item in analyses)
     emotion_distribution = Counter(item.emotion.label for item in analyses)
-    intent_distribution = Counter(item.intent for item in analyses)
+    intent_distribution = Counter(item.intent.primary if hasattr(item.intent, "primary") else str(item.intent) for item in analyses)
 
     average = round(sum(item.sentiment.score for item in analyses) / len(analyses), 3) if analyses else 0
     topics = Counter(topic for item in analyses for topic in item.topics)
