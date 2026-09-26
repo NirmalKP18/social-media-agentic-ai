@@ -1,0 +1,28 @@
+{
+  "query": "customer support",
+  "limit": 10,
+  "posts": [
+    {
+      "id": "1",
+      "platform": "facebook",
+      "author": "Sam",
+      "content": "Great support team, very fast and helpful!",
+      "publishedAt": "2026-09-01T10:00:00Z",
+      "engagement": { "likes": 12, "shares": 3, "comments": 2 }
+    },
+    {
+      "id": "2",
+      "platform": "x",
+      "author": "Alex",
+      "content": "Support is slow and frustrating, my issue is still broken @brand",
+      "engagement": { "likes": 4, "shares": 1 }
+    },
+    {
+      "id": "3",
+      "platform": "instagram",
+      "author": "Priya",
+      "content": "Love the new update #launch, really easy to use",
+      "engagement": { "likes": 20, "comments": 5 }
+    }
+  ]
+}

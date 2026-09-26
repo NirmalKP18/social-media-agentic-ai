@@ -1,0 +1,16 @@
+# CODEOWNERS for Social Media Agentic AI System
+
+# Member 1 — Frontend + Insight Generation Agent
+/frontend/ @sahilhaq2003
+/ai-services/agents/generation_agent/ @sahilhaq2003
+
+# Member 2 — Backend + Collection Agent
+/backend/ @NirmalKP18
+/ai-services/agents/collection_agent/ @NirmalKP18
+
+# Member 3 — NLP Agent
+/ai-services/agents/analysis_agent/ @theuni03
+
+# Member 4 — Retrieval / RAG Agent
+/ai-services/agents/retrieval_agent/ @PoornaviSina
+/ai-services/knowledge_base/ @PoornaviSina

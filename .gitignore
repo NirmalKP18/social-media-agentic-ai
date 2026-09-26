@@ -18,6 +18,7 @@ __pycache__/
 *.py[cod]
 venv/
 .venv/
+.pytest_cache/
 
 # IDE
 .vscode/
@@ -30,6 +31,10 @@ venv/
 chroma_db/
 faiss_index/
 vector_store/
+
+# Python agent service runtime artifacts
+ai-services/.state/
+ai-services/knowledge_base/indexes/
 
 # OS files
 .DS_Store

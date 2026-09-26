@@ -1,0 +1,7 @@
+# Local semantic RAG stack for the intelligence agents.
+# torch is pulled transitively by sentence-transformers (CPU wheels).
+sentence-transformers>=3.0
+faiss-cpu>=1.8
+numpy>=1.24
+fastapi>=0.115
+uvicorn>=0.30
