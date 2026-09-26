@@ -1,5 +1,7 @@
 import { useHealthCheck } from '../hooks/useHealthCheck.js'
 import { getStatusText } from '../utils/status.js'
+import Loading from './common/Loading.jsx'
+import ErrorMessage from './common/ErrorMessage.jsx'
 
 function HealthCheck() {
   const { data, loading, error, retry } = useHealthCheck()
@@ -12,16 +14,9 @@ function HealthCheck() {
         <span className="health__status">{statusText}</span>
       </div>
 
-      {loading && <p className="health__detail">Checking <code>GET /api/health</code>...</p>}
+      {loading && <Loading label="Checking GET /api/health..." />}
 
-      {error && (
-        <div className="health__detail">
-          <p>{error}</p>
-          <button type="button" onClick={retry}>
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ErrorMessage message={error} onRetry={retry} />}
 
       {!loading && !error && data && (
         <p className="health__detail">Response: {data.message}</p>

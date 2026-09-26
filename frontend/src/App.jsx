@@ -1,10 +1,17 @@
-import HomePage from './pages/HomePage.jsx'
+import { BrowserRouter } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext.jsx'
+import { OnboardingProvider } from './context/OnboardingContext.jsx'
+import AppRoutes from './routes/AppRoutes.jsx'
 
 function App() {
   return (
-    <div className="app">
-      <HomePage />
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <OnboardingProvider>
+          <AppRoutes />
+        </OnboardingProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
