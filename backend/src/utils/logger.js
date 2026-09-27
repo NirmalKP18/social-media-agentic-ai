@@ -16,3 +16,4 @@ export const logger = {
     console.log(`\x1b[35m${'='.repeat(60)}\x1b[0m\n`)
   },
 }
+// [NirmalKP18-revision-tag-4]: chore(backend): add trace logging for asynchronous scraper job events
