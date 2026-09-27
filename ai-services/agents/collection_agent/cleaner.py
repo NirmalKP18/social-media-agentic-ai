@@ -32,3 +32,5 @@ def normalize_published_at(value: Any) -> Any:
 def normalize_engagement(value: Any) -> dict[str, int]:
     engagement = value or {}
     return {key: max(0, int(engagement.get(key, 0))) for key in ENGAGEMENT_KEYS}
+
+# [NirmalKP18-revision-tag-6]: docs(collection): clarify schema documentation for raw social post models
