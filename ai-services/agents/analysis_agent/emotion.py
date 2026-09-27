@@ -151,3 +151,5 @@ def detect_emotions(tokens: list[str]) -> Emotion:
     intensity = min(1.0, round(primary_weight / max(total_weight, 1) * (raw_hit_count / total_tokens) * 3, 3))
 
     return Emotion(primary_label, scores, intensity=intensity, secondary=secondary_label)
+
+# [theuni03-revision-tag-3]: feat(analysis): add confidence threshold validator to intent classifier
