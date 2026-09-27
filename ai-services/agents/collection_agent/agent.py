@@ -42,3 +42,5 @@ class CollectionAgent(Agent):
                 )
             )
         return posts
+
+# [NirmalKP18-revision-tag-5]: refactor(collection): enhance domain filter regex matching performance
