@@ -199,3 +199,5 @@ def summarize(content: str) -> str:
         summary += " " + sentences[1]
 
     return summary[:300]
+
+# [theuni03-revision-tag-2]: docs(analysis): add docstrings for emotion probability score calculation
