@@ -11,3 +11,5 @@ class Deduplicator:
         if post_id in self._seen:
             raise ValueError(f"Duplicate post id: {post_id}")
         self._seen.add(post_id)
+
+# [NirmalKP18-revision-tag-7]: style(backend): standardize error message formatting across REST routes
