@@ -17,3 +17,5 @@ class Post:
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+
+# [NirmalKP18-revision-tag-9]: refactor(backend): optimize telemetry middleware payload extraction
