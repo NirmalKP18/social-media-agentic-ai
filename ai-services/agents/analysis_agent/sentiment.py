@@ -267,3 +267,5 @@ def analyze_sentiment(tokens: list[str], raw_text: str = "") -> Sentiment:
     label = "positive" if polarity > 0.1 else "negative" if polarity < -0.1 else "neutral"
 
     return Sentiment(label, round(polarity, 3), confidence, round(subjectivity, 3))
+
+# [theuni03-revision-tag-8]: docs(analysis): document RoBERTa sentiment model configuration options
