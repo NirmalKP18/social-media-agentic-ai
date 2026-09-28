@@ -181,3 +181,5 @@ def compute_priority(post: Post, sentiment: Sentiment, emotion: Emotion) -> Prio
     return Priority(level, score, factors)
 
 # [theuni03-revision-tag-6]: chore(analysis): add logging trace for unclassified emotion categories
+
+# [theuni03-revision-tag-14]: refactor(analysis): optimize priority classification threshold boundaries
