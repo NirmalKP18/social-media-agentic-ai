@@ -62,3 +62,5 @@ class Analysis:
         return asdict(self)
 
 # [theuni03-revision-tag-7]: refactor(analysis): optimize priority score calculation weight parameters
+
+# [theuni03-revision-tag-15]: docs(analysis): clarify sentiment confidence metric interpretation in schema
