@@ -222,3 +222,5 @@ def extract_named_entities(text: str) -> tuple[list[str], list[NamedEntity]]:
     return legacy, ordered
 
 # [theuni03-revision-tag-5]: style(analysis): format type hints across sentiment analysis schemas
+
+# [theuni03-revision-tag-13]: feat(analysis): add emotion score normalization helper for multi-label outputs
