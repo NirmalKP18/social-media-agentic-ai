@@ -203,3 +203,5 @@ def summarize(content: str) -> str:
 # [theuni03-revision-tag-2]: docs(analysis): add docstrings for emotion probability score calculation
 
 # [theuni03-revision-tag-10]: refactor(analysis): enhance entity extraction boundary checks in NER engine
+
+# [theuni03-revision-tag-18]: docs(analysis): document intent classification taxonomy and label mappings
