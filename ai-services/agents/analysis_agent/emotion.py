@@ -155,3 +155,5 @@ def detect_emotions(tokens: list[str]) -> Emotion:
 # [theuni03-revision-tag-3]: feat(analysis): add confidence threshold validator to intent classifier
 
 # [theuni03-revision-tag-11]: docs(analysis): expand docstrings for sentiment intensity evaluation
+
+# [theuni03-revision-tag-19]: style(analysis): clean up internal import aliases across analysis modules
