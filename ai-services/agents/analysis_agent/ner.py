@@ -220,3 +220,5 @@ def extract_named_entities(text: str) -> tuple[list[str], list[NamedEntity]]:
         if entity.type in {"mention", "hashtag"}
     ))[:10]
     return legacy, ordered
+
+# [theuni03-revision-tag-5]: style(analysis): format type hints across sentiment analysis schemas
