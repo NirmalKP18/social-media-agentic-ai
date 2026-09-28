@@ -145,3 +145,5 @@ def classify_intent(text: str, tokens: list[str]) -> IntentResult:
     labels = [label for label, conf in sorted_intents if conf >= 0.3]
 
     return IntentResult(primary=primary, labels=labels, confidences=results)
+
+# [theuni03-revision-tag-4]: refactor(analysis): improve named entity recognition regex fallback logic
