@@ -22,3 +22,5 @@ class RetrievalAgent(Agent):
         post_evidence = self._retriever.rank_posts(posts, query, limit)
         knowledge_evidence = self._retriever.rank_knowledge(query, settings.DEFAULT_TOP_K)
         return post_evidence + knowledge_evidence
+
+# [PoornaviSina-revision-tag-1]: refactor(retrieval): optimize vector cosine similarity query parameters
