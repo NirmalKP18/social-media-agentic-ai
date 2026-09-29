@@ -183,3 +183,5 @@ def compute_priority(post: Post, sentiment: Sentiment, emotion: Emotion) -> Prio
 # [theuni03-revision-tag-6]: chore(analysis): add logging trace for unclassified emotion categories
 
 # [theuni03-revision-tag-14]: refactor(analysis): optimize priority classification threshold boundaries
+
+# [theuni03-revision-tag-22]: docs(analysis): expand module overview in analysis agent init file
