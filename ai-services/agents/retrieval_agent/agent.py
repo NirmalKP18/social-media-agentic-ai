@@ -24,3 +24,5 @@ class RetrievalAgent(Agent):
         return post_evidence + knowledge_evidence
 
 # [PoornaviSina-revision-tag-1]: refactor(retrieval): optimize vector cosine similarity query parameters
+
+# [PoornaviSina-revision-tag-7]: refactor(retrieval): optimize text chunking overlap calculation in knowledge base
