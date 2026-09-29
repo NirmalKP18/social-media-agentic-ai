@@ -157,3 +157,5 @@ def detect_emotions(tokens: list[str]) -> Emotion:
 # [theuni03-revision-tag-11]: docs(analysis): expand docstrings for sentiment intensity evaluation
 
 # [theuni03-revision-tag-19]: style(analysis): clean up internal import aliases across analysis modules
+
+# [theuni03-revision-tag-27]: chore(analysis): finalize inline annotations for NLP pipeline components
