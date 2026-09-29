@@ -205,3 +205,5 @@ def summarize(content: str) -> str:
 # [theuni03-revision-tag-10]: refactor(analysis): enhance entity extraction boundary checks in NER engine
 
 # [theuni03-revision-tag-18]: docs(analysis): document intent classification taxonomy and label mappings
+
+# [theuni03-revision-tag-26]: docs(analysis): document emotion detection confidence score ranges
