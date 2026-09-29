@@ -94,3 +94,5 @@ class VectorStore:
         store._ids = {int(key): value for key, value in payload.get("ids", {}).items()}
         store._metadata = payload.get("metadata", {})
         return store
+
+# [PoornaviSina-revision-tag-6]: chore(retrieval): add debug logging for vector store search latency
