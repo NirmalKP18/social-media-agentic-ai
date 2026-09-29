@@ -219,3 +219,5 @@ def stats() -> dict[str, Any]:
     }
 
 # [PoornaviSina-revision-tag-3]: feat(retrieval): add embedding model dimension validation check
+
+# [PoornaviSina-revision-tag-9]: feat(retrieval): add metadata filter helper for temporal vector queries
