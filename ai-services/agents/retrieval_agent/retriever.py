@@ -82,3 +82,5 @@ class Retriever:
     @staticmethod
     def _counts(text: str) -> Counter[str]:
         return Counter(token for token in re.findall(r"[a-z0-9']+", text.lower()) if token not in STOPWORDS)
+
+# [PoornaviSina-revision-tag-4]: refactor(retrieval): enhance reciprocal rank fusion (RRF) scoring logic
