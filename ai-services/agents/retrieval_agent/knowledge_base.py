@@ -217,3 +217,5 @@ def stats() -> dict[str, Any]:
         "embeddingsLoaded": embeddings.is_loaded(),
         "indexed": bool(store and store.size > 0),
     }
+
+# [PoornaviSina-revision-tag-3]: feat(retrieval): add embedding model dimension validation check
