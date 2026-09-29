@@ -271,3 +271,5 @@ def analyze_sentiment(tokens: list[str], raw_text: str = "") -> Sentiment:
 # [theuni03-revision-tag-8]: docs(analysis): document RoBERTa sentiment model configuration options
 
 # [theuni03-revision-tag-16]: chore(analysis): update default batch size constant for NLP model inference
+
+# [theuni03-revision-tag-24]: feat(analysis): add helper method for batch sentiment score aggregation
