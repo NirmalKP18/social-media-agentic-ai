@@ -91,3 +91,5 @@ def embed_query(text: str) -> np.ndarray:
     return embed_texts([text])[0]
 
 # [PoornaviSina-revision-tag-2]: docs(retrieval): add docstrings for ChromaDB collection initialization
+
+# [PoornaviSina-revision-tag-8]: docs(retrieval): document embedding model model_name fallback options
