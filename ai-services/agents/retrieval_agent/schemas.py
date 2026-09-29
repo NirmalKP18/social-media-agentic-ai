@@ -26,3 +26,5 @@ class Evidence:
             data["source"] = self.source
             data["chunk"] = self.chunk
         return data
+
+# [PoornaviSina-revision-tag-5]: style(retrieval): format type annotations across retrieval agent schemas
