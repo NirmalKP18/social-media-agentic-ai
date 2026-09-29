@@ -89,3 +89,5 @@ def embed_texts(texts: list[str]) -> np.ndarray:
 
 def embed_query(text: str) -> np.ndarray:
     return embed_texts([text])[0]
+
+# [PoornaviSina-revision-tag-2]: docs(retrieval): add docstrings for ChromaDB collection initialization
