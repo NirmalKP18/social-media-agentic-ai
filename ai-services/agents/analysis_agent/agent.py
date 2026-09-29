@@ -120,3 +120,5 @@ class AnalysisAgent(Agent):
 # [theuni03-revision-tag-9]: feat(analysis): add text normalization helper for multilingual payloads
 
 # [theuni03-revision-tag-17]: refactor(analysis): streamline entity filter rules for social media mentions
+
+# [theuni03-revision-tag-25]: refactor(analysis): improve error handling for malformed NLP input dicts
