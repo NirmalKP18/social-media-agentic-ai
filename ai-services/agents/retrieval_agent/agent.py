@@ -26,3 +26,5 @@ class RetrievalAgent(Agent):
 # [PoornaviSina-revision-tag-1]: refactor(retrieval): optimize vector cosine similarity query parameters
 
 # [PoornaviSina-revision-tag-7]: refactor(retrieval): optimize text chunking overlap calculation in knowledge base
+
+# [PoornaviSina-revision-tag-13]: feat(retrieval): add distance metric conversion utility in search engine
