@@ -32,3 +32,5 @@ class Evidence:
 # [PoornaviSina-revision-tag-11]: docs(retrieval): expand docstrings for vector search top_k selection
 
 # [PoornaviSina-revision-tag-17]: refactor(retrieval): streamline metadata sanitization before ChromaDB indexing
+
+# [PoornaviSina-revision-tag-23]: style(retrieval): enforce consistent type hints in vector similarity calculator
