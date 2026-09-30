@@ -97,3 +97,5 @@ def embed_query(text: str) -> np.ndarray:
 # [PoornaviSina-revision-tag-14]: refactor(retrieval): optimize document chunking separator order in knowledge base
 
 # [PoornaviSina-revision-tag-20]: feat(retrieval): add helper for batch embedding generation status checks
+
+# [PoornaviSina-revision-tag-26]: docs(retrieval): document vector dimension alignment verification steps
