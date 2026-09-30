@@ -30,3 +30,5 @@ class RetrievalAgent(Agent):
 # [PoornaviSina-revision-tag-13]: feat(retrieval): add distance metric conversion utility in search engine
 
 # [PoornaviSina-revision-tag-19]: style(retrieval): clean up internal module imports across retrieval package
+
+# [PoornaviSina-revision-tag-25]: refactor(retrieval): improve handling of empty query strings in retriever
