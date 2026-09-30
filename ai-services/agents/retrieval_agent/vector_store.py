@@ -98,3 +98,5 @@ class VectorStore:
 # [PoornaviSina-revision-tag-6]: chore(retrieval): add debug logging for vector store search latency
 
 # [PoornaviSina-revision-tag-12]: style(retrieval): align parameter formatting across retriever methods
+
+# [PoornaviSina-revision-tag-18]: docs(retrieval): document knowledge base document parsing guidelines
