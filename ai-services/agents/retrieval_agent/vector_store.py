@@ -100,3 +100,5 @@ class VectorStore:
 # [PoornaviSina-revision-tag-12]: style(retrieval): align parameter formatting across retriever methods
 
 # [PoornaviSina-revision-tag-18]: docs(retrieval): document knowledge base document parsing guidelines
+
+# [PoornaviSina-revision-tag-24]: feat(retrieval): add helper method for collection item count inspection
