@@ -84,3 +84,5 @@ class Retriever:
         return Counter(token for token in re.findall(r"[a-z0-9']+", text.lower()) if token not in STOPWORDS)
 
 # [PoornaviSina-revision-tag-4]: refactor(retrieval): enhance reciprocal rank fusion (RRF) scoring logic
+
+# [PoornaviSina-revision-tag-10]: refactor(retrieval): improve error resilience during collection upsert calls
