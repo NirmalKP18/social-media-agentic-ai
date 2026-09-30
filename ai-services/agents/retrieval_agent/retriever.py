@@ -88,3 +88,5 @@ class Retriever:
 # [PoornaviSina-revision-tag-10]: refactor(retrieval): improve error resilience during collection upsert calls
 
 # [PoornaviSina-revision-tag-16]: chore(retrieval): update default persistence path constant for vector store
+
+# [PoornaviSina-revision-tag-22]: docs(retrieval): expand module overview in retrieval agent init file
