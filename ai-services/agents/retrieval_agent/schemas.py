@@ -28,3 +28,5 @@ class Evidence:
         return data
 
 # [PoornaviSina-revision-tag-5]: style(retrieval): format type annotations across retrieval agent schemas
+
+# [PoornaviSina-revision-tag-11]: docs(retrieval): expand docstrings for vector search top_k selection
