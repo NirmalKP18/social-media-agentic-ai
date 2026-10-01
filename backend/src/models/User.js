@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionStatus: {
       type: String,
-      enum: ['active', 'payment_pending', 'suspended', 'cancelled', 'expired', 'not_required'],
+      enum: ['active', 'payment_pending', 'suspended', 'cancelled', 'expired'],
       default: 'active',
     },
     pipelineUsage: {
@@ -69,6 +69,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['active', 'suspended'],
       default: 'active',
+    },
+    suspensionReason: {
+      type: String,
+      default: '',
+      trim: true,
+      maxlength: 500,
     },
     lastLoginAt: {
       type: Date,
@@ -119,6 +125,7 @@ userSchema.methods.toSafeJSON = function toSafeJSON() {
     country: this.country || '',
     phone: this.phone || '',
     status: this.status || 'active',
+    suspensionReason: this.suspensionReason || '',
     lastLoginAt: this.lastLoginAt || null,
     onboardingPreferences: this.onboardingPreferences || {
       hasSeenWelcome: false,

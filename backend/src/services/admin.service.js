@@ -240,11 +240,15 @@ export const updateUserAdmin = async (userId, data) => {
   const user = await User.findById(userId)
   if (!user) throw new HttpError('User not found', 404)
 
-  const allowedFields = ['name', 'role', 'plan', 'status', 'subscriptionStatus', 'company', 'country', 'phone']
+  const allowedFields = ['name', 'role', 'plan', 'status', 'subscriptionStatus', 'suspensionReason', 'company', 'country', 'phone']
   for (const field of allowedFields) {
     if (data[field] !== undefined) {
       user[field] = data[field]
     }
+  }
+
+  if (data.status === 'active' && data.suspensionReason === undefined) {
+    user.suspensionReason = ''
   }
 
   if (data.pipelineUsage) {

@@ -69,7 +69,8 @@ export const loginUser = async ({ email, password }) => {
   }
 
   if (user.status === 'suspended') {
-    throw new HttpError('Your account has been suspended. Please contact platform support.', 403)
+    const reasonText = user.suspensionReason ? ` Reason: "${user.suspensionReason}"` : ''
+    throw new HttpError(`Your account has been suspended by an administrator.${reasonText}`, 403)
   }
 
   user.lastLoginAt = new Date()
