@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionStatus: {
       type: String,
-      enum: ['active', 'payment_pending', 'suspended', 'cancelled', 'expired'],
+      enum: ['active', 'payment_pending', 'suspended', 'cancelled', 'expired', 'not_required'],
       default: 'active',
     },
     pipelineUsage: {
