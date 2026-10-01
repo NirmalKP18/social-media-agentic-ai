@@ -22,32 +22,6 @@ export default function AdminPanelPage() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [showUserModal, setShowUserModal] = useState(false)
   const [customQuota, setCustomQuota] = useState(20)
-  const [suspensionModalUser, setSuspensionModalUser] = useState(null)
-  const [suspensionReasonText, setSuspensionReasonText] = useState('')
-
-  const handleOpenSuspendModal = (u) => {
-    setSuspensionModalUser(u)
-    setSuspensionReasonText(u.suspensionReason || 'Account suspended by platform administrator due to policy or payment review.')
-  }
-
-  const handleConfirmSuspension = async () => {
-    if (!suspensionModalUser) return
-    const uId = suspensionModalUser.id || suspensionModalUser._id
-    await handleUpdateUser(uId, {
-      status: 'suspended',
-      suspensionReason: suspensionReasonText.trim() || 'Account suspended by platform administrator.',
-    })
-    setSuspensionModalUser(null)
-    setSuspensionReasonText('')
-  }
-
-  const handleUnsuspendUser = async (u) => {
-    const uId = u.id || u._id
-    await handleUpdateUser(uId, {
-      status: 'active',
-      suspensionReason: '',
-    })
-  }
 
   // Plans data
   const [plans, setPlans] = useState([])
@@ -66,19 +40,36 @@ export default function AdminPanelPage() {
     try {
       setLoading(true)
       setError(null)
-      const [analyticsData, usersData, paymentsData, plansData, pipelinesData] = await Promise.all([
+      const [analyticsRes, usersRes, paymentsRes, plansRes, pipelinesRes] = await Promise.all([
         adminService.getAnalytics().catch(() => ({})),
-        adminService.getUsers().catch(() => []),
-        adminService.getPayments().catch(() => []),
-        adminService.getPlans().catch(() => ({ data: { plans: [] } })),
-        adminService.getPipelineRuns().catch(() => ({ data: { runs: [] } })),
+        adminService.getUsers().catch(() => ({})),
+        adminService.getPayments().catch(() => ({})),
+        adminService.getPlans().catch(() => ({})),
+        adminService.getPipelineRuns().catch(() => ({})),
       ])
 
-      setAnalytics(analyticsData?.data || analyticsData || {})
-      setUsers(Array.isArray(usersData) ? usersData : usersData?.data?.users || [])
-      setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData?.data?.payments || [])
-      setPlans(plansData?.data?.plans || plansData?.plans || [])
-      setPipelineRuns(pipelinesData?.data?.runs || pipelinesData?.runs || [])
+      const extractArray = (res, key) => {
+        if (Array.isArray(res)) return res
+        if (res?.data && Array.isArray(res.data)) return res.data
+        if (res?.data?.[key] && Array.isArray(res.data[key])) return res.data[key]
+        if (res?.data?.data?.[key] && Array.isArray(res.data.data[key])) return res.data.data[key]
+        if (res?.[key] && Array.isArray(res[key])) return res[key]
+        return []
+      }
+
+      const extractObject = (res, key) => {
+        if (res?.data?.data?.[key]) return res.data.data[key]
+        if (res?.data?.[key]) return res.data[key]
+        if (res?.data) return res.data
+        if (res?.[key]) return res[key]
+        return res || {}
+      }
+
+      setAnalytics(extractObject(analyticsRes, 'analytics'))
+      setUsers(extractArray(usersRes, 'users'))
+      setPayments(extractArray(paymentsRes, 'payments'))
+      setPlans(extractArray(plansRes, 'plans'))
+      setPipelineRuns(extractArray(pipelinesRes, 'runs'))
     } catch (err) {
       setError(err.message || 'Failed to load administrator data')
     } finally {
@@ -441,7 +432,7 @@ export default function AdminPanelPage() {
                 <tr>
                   <th>Customer</th>
                   <th>Company &amp; Country</th>
-                  <th>Plan &amp; Expiration</th>
+                  <th>Plan Tier</th>
                   <th>Pipeline Usage</th>
                   <th>Account Status</th>
                   <th>Joined</th>
@@ -460,7 +451,6 @@ export default function AdminPanelPage() {
                     const uId = u.id || u._id
                     const isSuperAdmin = u.email === 'admin@gmail.com'
                     const usage = u.pipelineUsage || { limit: 20, used: 0, remaining: 20 }
-                    const isSuspended = u.status === 'suspended'
                     return (
                       <tr key={uId}>
                         <td>
@@ -477,31 +467,21 @@ export default function AdminPanelPage() {
                           <small className="text-muted">{u.country || 'Global'}</small>
                         </td>
                         <td>
-                          <div>
-                            <select
-                              value={(u.plan || 'free').toLowerCase()}
-                              onChange={(e) => handleChangePlan(uId, e.target.value)}
-                              className="admin-inline-select plan-select"
-                              disabled={isSuperAdmin}
-                            >
-                              <option value="free">Free (20 runs)</option>
-                              <option value="plus">Plus (250 runs)</option>
-                              <option value="premium">Premium (1000 runs)</option>
-                            </select>
-                            <div style={{ marginTop: 4 }}>
-                              <span className={`saas-badge saas-badge--${(u.subscriptionStatus || 'active').toLowerCase()}`} style={{ fontSize: '10px', padding: '1px 6px' }}>
-                                Status: {u.subscriptionStatus || 'active'}
-                              </span>
-                            </div>
-                            <small className="text-muted" style={{ display: 'block', marginTop: 2 }}>
-                              Reset: {usage.nextReset ? formatDate(usage.nextReset) : 'Monthly Cycle'}
-                            </small>
-                          </div>
+                          <select
+                            value={(u.plan || 'free').toLowerCase()}
+                            onChange={(e) => handleChangePlan(uId, e.target.value)}
+                            className="admin-inline-select plan-select"
+                            disabled={isSuperAdmin}
+                          >
+                            <option value="free">Free (20 runs)</option>
+                            <option value="plus">Plus (250 runs)</option>
+                            <option value="premium">Premium (1000 runs)</option>
+                          </select>
                         </td>
                         <td>
                           <div className="usage-cell-wrap">
                             <strong>{usage.used} / {usage.limit} Used</strong>
-                            <small className="text-muted">({usage.remaining} remaining)</small>
+                            <small className="text-muted">({usage.remaining} left)</small>
                             <div className="saas-usage-meter-bar saas-usage-meter-bar--sm">
                               <div
                                 className={`saas-usage-meter-bar__fill ${usage.remaining <= 2 ? 'saas-usage-meter-bar__fill--critical' : ''}`}
@@ -511,16 +491,18 @@ export default function AdminPanelPage() {
                           </div>
                         </td>
                         <td>
-                          <div>
-                            <span className={`status-pill status-pill--${isSuspended ? 'failed' : 'processed'}`}>
-                              {isSuspended ? '● Suspended' : '● Active'}
-                            </span>
-                            {isSuspended && u.suspensionReason && (
-                              <small style={{ display: 'block', marginTop: 4, maxWidth: 180, fontStyle: 'italic', color: '#ef4444', fontSize: '11px' }}>
-                                "{u.suspensionReason}"
-                              </small>
-                            )}
-                          </div>
+                          <button
+                            type="button"
+                            className={`status-toggle-btn status-toggle-btn--${u.status || 'active'}`}
+                            onClick={() =>
+                              handleUpdateUser(uId, {
+                                status: u.status === 'suspended' ? 'active' : 'suspended',
+                              })
+                            }
+                            disabled={isSuperAdmin}
+                          >
+                            {u.status || 'active'}
+                          </button>
                         </td>
                         <td className="date-cell">
                           {u.createdAt ? formatDate(u.createdAt) : 'N/A'}
@@ -538,35 +520,14 @@ export default function AdminPanelPage() {
                             Inspect / Quota
                           </button>
                           {!isSuperAdmin && (
-                            <>
-                              {isSuspended ? (
-                                <button
-                                  type="button"
-                                  className="btn btn--outline btn--xs"
-                                  style={{ marginLeft: 6, color: '#10b981', borderColor: '#10b981' }}
-                                  onClick={() => handleUnsuspendUser(u)}
-                                >
-                                  Reactivate
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="btn btn--outline btn--xs"
-                                  style={{ marginLeft: 6, color: '#ef4444', borderColor: '#ef4444' }}
-                                  onClick={() => handleOpenSuspendModal(u)}
-                                >
-                                  Suspend
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                className="btn btn--danger-outline btn--xs"
-                                style={{ marginLeft: 6 }}
-                                onClick={() => handleDeleteUser(uId, u.name)}
-                              >
-                                Delete
-                              </button>
-                            </>
+                            <button
+                              type="button"
+                              className="btn btn--danger-outline btn--xs"
+                              style={{ marginLeft: 6 }}
+                              onClick={() => handleDeleteUser(uId, u.name)}
+                            >
+                              Delete
+                            </button>
                           )}
                         </td>
                       </tr>
@@ -839,56 +800,6 @@ export default function AdminPanelPage() {
                   }}
                 >
                   Reset Free 20 Runs Allowance
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: Account Suspension with Custom Message */}
-      {suspensionModalUser && (
-        <div className="modal-overlay">
-          <div className="admin-modal-card">
-            <div className="modal-header">
-              <h3 style={{ color: '#ef4444' }}>Suspend User Account</h3>
-              <button type="button" className="close-btn" onClick={() => setSuspensionModalUser(null)}>×</button>
-            </div>
-            <div className="admin-modal-body">
-              <div className="user-inspect-summary">
-                <h4>{suspensionModalUser.name}</h4>
-                <p>{suspensionModalUser.email} • {suspensionModalUser.company || 'Individual'} ({suspensionModalUser.plan || 'Free'} Plan)</p>
-              </div>
-
-              <div className="form-group" style={{ marginTop: 16 }}>
-                <label style={{ fontWeight: 600, color: '#334155' }}>
-                  Suspension Reason / Message (Will be displayed to user upon login attempt):
-                </label>
-                <textarea
-                  rows="3"
-                  value={suspensionReasonText}
-                  onChange={(e) => setSuspensionReasonText(e.target.value)}
-                  className="form-control"
-                  placeholder="Enter reason for account suspension (e.g. Policy violation, Unpaid invoice, Abuse)..."
-                  style={{ width: '100%', padding: '8px 12px', marginTop: '6px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
-
-              <div className="modal-actions-cluster" style={{ marginTop: 20 }}>
-                <button
-                  type="button"
-                  className="btn btn--danger"
-                  style={{ backgroundColor: '#ef4444', color: '#fff' }}
-                  onClick={handleConfirmSuspension}
-                >
-                  Confirm Account Suspension
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--outline"
-                  onClick={() => setSuspensionModalUser(null)}
-                >
-                  Cancel
                 </button>
               </div>
             </div>
