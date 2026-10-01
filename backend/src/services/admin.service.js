@@ -51,6 +51,72 @@ export const ensureAdminAccount = async () => {
       await existingAdmin.save()
     }
 
+    // Seed default demo customer accounts if only admin exists
+    const userCount = await User.countDocuments()
+    if (userCount <= 1) {
+      logger.info('Seeding demo customer accounts for Admin panel...')
+      const demoUsers = [
+        {
+          name: 'Sarah Jenkins',
+          email: 'sarah.jenkins@acmebrand.com',
+          password: 'password123',
+          role: 'user',
+          plan: 'Plus',
+          subscriptionStatus: 'active',
+          company: 'Acme Brand Co',
+          country: 'United States',
+          phone: '+1 555-0143',
+          status: 'active',
+          pipelineUsage: { limit: 250, used: 45, remaining: 205, lastReset: new Date(), nextReset: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000) },
+        },
+        {
+          name: 'Michael Chang',
+          email: 'm.chang@techcorp.io',
+          password: 'password123',
+          role: 'user',
+          plan: 'Free',
+          subscriptionStatus: 'active',
+          company: 'TechCorp Inc',
+          country: 'Canada',
+          phone: '+1 416-555-0199',
+          status: 'active',
+          pipelineUsage: { limit: 20, used: 18, remaining: 2, lastReset: new Date(), nextReset: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) },
+        },
+        {
+          name: 'Elena Rostova',
+          email: 'elena@globalventures.com',
+          password: 'password123',
+          role: 'user',
+          plan: 'Premium',
+          subscriptionStatus: 'active',
+          company: 'Global Ventures Ltd',
+          country: 'United Kingdom',
+          phone: '+44 20 7946 0912',
+          status: 'active',
+          pipelineUsage: { limit: 1000, used: 340, remaining: 660, lastReset: new Date(), nextReset: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) },
+        },
+        {
+          name: 'David Miller',
+          email: 'david@soloprep.org',
+          password: 'password123',
+          role: 'user',
+          plan: 'Free',
+          subscriptionStatus: 'suspended',
+          suspensionReason: 'Unpaid invoice for premium pipeline overage.',
+          company: 'SoloPrep',
+          country: 'Australia',
+          phone: '+61 2 9385 1000',
+          status: 'suspended',
+          pipelineUsage: { limit: 20, used: 20, remaining: 0, lastReset: new Date(), nextReset: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) },
+        },
+      ]
+
+      for (const u of demoUsers) {
+        await User.create(u)
+      }
+      logger.info('Demo customer accounts seeded successfully.')
+    }
+
     // Seed default demo transactions if none exist
     const paymentCount = await Payment.countDocuments()
     if (paymentCount === 0) {
@@ -240,15 +306,11 @@ export const updateUserAdmin = async (userId, data) => {
   const user = await User.findById(userId)
   if (!user) throw new HttpError('User not found', 404)
 
-  const allowedFields = ['name', 'role', 'plan', 'status', 'subscriptionStatus', 'suspensionReason', 'company', 'country', 'phone']
+  const allowedFields = ['name', 'role', 'plan', 'status', 'subscriptionStatus', 'company', 'country', 'phone']
   for (const field of allowedFields) {
     if (data[field] !== undefined) {
       user[field] = data[field]
     }
-  }
-
-  if (data.status === 'active' && data.suspensionReason === undefined) {
-    user.suspensionReason = ''
   }
 
   if (data.pipelineUsage) {
