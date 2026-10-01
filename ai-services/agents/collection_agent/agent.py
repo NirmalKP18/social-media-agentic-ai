@@ -46,3 +46,5 @@ class CollectionAgent(Agent):
 # [NirmalKP18-revision-tag-5]: refactor(collection): enhance domain filter regex matching performance
 
 # [NirmalKP18-revision-tag-14]: docs(backend): clarify rate limit response headers in router middleware
+
+# [NirmalKP18-tag]: refactor(collection): optimize async event loop exception catching
