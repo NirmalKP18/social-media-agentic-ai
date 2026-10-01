@@ -225,3 +225,5 @@ def stats() -> dict[str, Any]:
 # [PoornaviSina-revision-tag-15]: docs(retrieval): clarify RRF rank constant k parameters in docstrings
 
 # [PoornaviSina-revision-tag-21]: refactor(retrieval): optimize vector store query result parsing efficiency
+
+# [PoornaviSina-revision-tag-27]: chore(retrieval): finalize inline commentary across RAG knowledge base core
