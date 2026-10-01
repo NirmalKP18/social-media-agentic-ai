@@ -54,7 +54,7 @@ export const ensureAdminAccount = async () => {
     // Seed default demo customer accounts if only admin exists
     const userCount = await User.countDocuments()
     if (userCount <= 1) {
-      logger.info('Seeding demo customer accounts for Admin panel...')
+      logger.info('Seeding default customer accounts for Admin panel...')
       const demoUsers = [
         {
           name: 'Sarah Jenkins',
@@ -112,7 +112,11 @@ export const ensureAdminAccount = async () => {
       ]
 
       for (const u of demoUsers) {
-        await User.create(u)
+        try {
+          await User.create(u)
+        } catch (e) {
+          // Ignore duplicate errors if seeded previously
+        }
       }
       logger.info('Demo customer accounts seeded successfully.')
     }
