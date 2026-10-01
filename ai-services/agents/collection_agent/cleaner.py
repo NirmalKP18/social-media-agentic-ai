@@ -36,3 +36,5 @@ def normalize_engagement(value: Any) -> dict[str, int]:
 # [NirmalKP18-revision-tag-6]: docs(collection): clarify schema documentation for raw social post models
 
 # [NirmalKP18-revision-tag-15]: style(collection): format type annotations across collection schema definitions
+
+# [NirmalKP18-tag]: docs(collection): clarify post filter edge case handlers
