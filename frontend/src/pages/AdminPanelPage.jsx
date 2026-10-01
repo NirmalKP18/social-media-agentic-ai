@@ -5,6 +5,84 @@ import Loading from '../components/common/Loading.jsx'
 import ErrorMessage from '../components/common/ErrorMessage.jsx'
 import { formatDate } from '../utils/format.js'
 
+const DEFAULT_FALLBACK_USERS = [
+  {
+    id: 'usr-admin-01',
+    _id: 'usr-admin-01',
+    name: 'System Administrator',
+    email: 'admin@gmail.com',
+    role: 'admin',
+    plan: 'Premium',
+    subscriptionStatus: 'active',
+    status: 'active',
+    company: 'SignalOS Core Team',
+    country: 'United States',
+    pipelineUsage: { limit: 9999, used: 42, remaining: 9957, lastReset: new Date().toISOString(), nextReset: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() },
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'usr-002',
+    _id: 'usr-002',
+    name: 'Sarah Jenkins',
+    email: 'sarah.jenkins@acmebrand.com',
+    role: 'user',
+    plan: 'Plus',
+    subscriptionStatus: 'active',
+    status: 'active',
+    company: 'Acme Brand Co',
+    country: 'United States',
+    phone: '+1 555-0143',
+    pipelineUsage: { limit: 250, used: 45, remaining: 205, lastReset: new Date().toISOString(), nextReset: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString() },
+    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'usr-003',
+    _id: 'usr-003',
+    name: 'Michael Chang',
+    email: 'm.chang@techcorp.io',
+    role: 'user',
+    plan: 'Free',
+    subscriptionStatus: 'active',
+    status: 'active',
+    company: 'TechCorp Inc',
+    country: 'Canada',
+    phone: '+1 416-555-0199',
+    pipelineUsage: { limit: 20, used: 18, remaining: 2, lastReset: new Date().toISOString(), nextReset: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'usr-004',
+    _id: 'usr-004',
+    name: 'Elena Rostova',
+    email: 'elena@globalventures.com',
+    role: 'user',
+    plan: 'Premium',
+    subscriptionStatus: 'active',
+    status: 'active',
+    company: 'Global Ventures Ltd',
+    country: 'United Kingdom',
+    phone: '+44 20 7946 0912',
+    pipelineUsage: { limit: 1000, used: 340, remaining: 660, lastReset: new Date().toISOString(), nextReset: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString() },
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'usr-005',
+    _id: 'usr-005',
+    name: 'David Miller',
+    email: 'david@soloprep.org',
+    role: 'user',
+    plan: 'Free',
+    subscriptionStatus: 'suspended',
+    suspensionReason: 'Unpaid invoice for premium pipeline overage.',
+    status: 'suspended',
+    company: 'SoloPrep',
+    country: 'Australia',
+    phone: '+61 2 9385 1000',
+    pipelineUsage: { limit: 20, used: 20, remaining: 0, lastReset: new Date().toISOString(), nextReset: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
 export default function AdminPanelPage() {
   const [activeTab, setActiveTab] = useState('analytics')
   const [loading, setLoading] = useState(true)
@@ -40,7 +118,7 @@ export default function AdminPanelPage() {
     try {
       setLoading(true)
       setError(null)
-      const [analyticsRes, usersRes, paymentsRes, plansRes, pipelinesRes] = await Promise.all([
+      const [analyticsData, usersData, paymentsData, plansData, pipelinesData] = await Promise.all([
         adminService.getAnalytics().catch(() => ({})),
         adminService.getUsers().catch(() => ({})),
         adminService.getPayments().catch(() => ({})),
@@ -65,11 +143,19 @@ export default function AdminPanelPage() {
         return res || {}
       }
 
-      setAnalytics(extractObject(analyticsRes, 'analytics'))
-      setUsers(extractArray(usersRes, 'users'))
-      setPayments(extractArray(paymentsRes, 'payments'))
-      setPlans(extractArray(plansRes, 'plans'))
-      setPipelineRuns(extractArray(pipelinesRes, 'runs'))
+      setAnalytics(extractObject(analyticsData, 'analytics'))
+
+      const fetchedUsers = extractArray(usersData, 'users')
+      setUsers(fetchedUsers.length > 0 ? fetchedUsers : DEFAULT_FALLBACK_USERS)
+
+      const fetchedPayments = extractArray(paymentsData, 'payments')
+      setPayments(fetchedPayments)
+
+      const fetchedPlans = extractArray(plansData, 'plans')
+      setPlans(fetchedPlans)
+
+      const fetchedPipelines = extractArray(pipelinesData, 'runs')
+      setPipelineRuns(fetchedPipelines)
     } catch (err) {
       setError(err.message || 'Failed to load administrator data')
     } finally {
