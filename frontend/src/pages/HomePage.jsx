@@ -5,6 +5,7 @@ import HealthCheck from '../components/HealthCheck.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ROUTES } from '../constants/routes.js'
 import Icon from '../components/common/Icon.jsx'
+import PublicPipelineDemo from '../components/pipeline/PublicPipelineDemo.jsx'
 import logo from '../assets/signalos-logo.png'
 
 const PRICING_PLANS = [
@@ -136,50 +137,68 @@ function HomePage() {
     <PageContainer hideTitle>
       {/* ---------------- HERO SECTION ---------------- */}
       <section className="landing-hero">
-        <h1 className="landing-hero__title">
-          Know What People Are Saying <span className="hero-highlight">About Your Brand.</span>
-        </h1>
-
-        <p className="landing-hero__subtitle">
-          Monitor conversations, mentions, sentiment and trends across social media from one intelligent dashboard. Powered by an autonomous 4-Agent AI intelligence suite.
-        </p>
-
-        <div className="landing-hero__cta-row">
-          <button
-            type="button"
-            className="btn btn--primary btn--lg"
-            onClick={() => handleSelectPlan('Free')}
-          >
-            Start Monitoring Free (20 Runs Included) ➔
-          </button>
-          <a href="#demo-section" className="btn btn--outline btn--lg">
-            Test Live Simulator ↓
-          </a>
+        <div className="landing-hero__copy">
+          <div className="landing-hero__badge"><span /> Autonomous brand intelligence</div>
+          <h1 className="landing-hero__title">
+            Turn every social signal into <span className="hero-highlight">a confident next move.</span>
+          </h1>
+          <p className="landing-hero__subtitle">
+            SignalOS brings social monitoring, deep sentiment analysis, verified evidence, and response drafting into one human-governed intelligence workspace.
+          </p>
+          <div className="landing-hero__cta-row">
+            <button type="button" className="btn btn--primary btn--lg" onClick={() => handleSelectPlan('Free')}>
+              Start free <Icon name="arrow" size={17} />
+            </button>
+            <a href="#demo-section" className="btn btn--outline btn--lg">Try the live demo</a>
+          </div>
+          <div className="landing-hero__assurance" aria-label="Account benefits">
+            <span><Icon name="check" size={14} /> 20 pipeline runs included</span>
+            <span><Icon name="check" size={14} /> No credit card required</span>
+            <span><Icon name="shield" size={14} /> Human approval built in</span>
+          </div>
         </div>
 
-        {/* Hero Telemetry Pills */}
-        <div className="hero-trust-bar">
-          <div className="trust-item">
-            <strong>20 Free Runs</strong>
-            <span>Instant account allowance</span>
+        <div className="hero-product-preview" aria-label="SignalOS intelligence dashboard preview">
+          <div className="hero-product-preview__bar">
+            <span className="preview-brand"><img src={logo} alt="" /> SignalOS Intelligence</span>
+            <span className="preview-live"><i /> Live monitoring</span>
           </div>
-          <div className="trust-divider" />
-          <div className="trust-item">
-            <strong>4 AI Agents</strong>
-            <span>Continuous neural workflow</span>
+          <div className="hero-product-preview__body">
+            <div className="preview-heading">
+              <div><small>BRAND HEALTH</small><strong>Customer sentiment</strong></div>
+              <span>Last 30 days</span>
+            </div>
+            <div className="preview-score-row">
+              <div className="preview-score"><strong>78</strong><span>/100</span><small>Healthy</small></div>
+              <div className="preview-chart" aria-hidden="true">
+                {[36, 42, 39, 51, 48, 58, 62, 57, 69, 72, 78, 74].map((height, index) => (
+                  <i key={index} style={{ height: `${height}%` }} />
+                ))}
+              </div>
+            </div>
+            <div className="preview-kpis">
+              <div><span>Positive</span><strong className="positive">72%</strong><small>+8.4%</small></div>
+              <div><span>Mentions</span><strong>2,847</strong><small>Across 6 sources</small></div>
+              <div><span>Urgent</span><strong>12</strong><small>Need review</small></div>
+            </div>
+            <div className="preview-insight">
+              <span><Icon name="sparkles" size={17} /></span>
+              <div><small>AI INSIGHT</small><p>Product-launch sentiment is trending upward, led by feature praise and design conversations.</p></div>
+            </div>
           </div>
-          <div className="trust-divider" />
-          <div className="trust-item">
-            <strong>6+ Platforms</strong>
-            <span>X, Reddit, LinkedIn & Meta</span>
-          </div>
-          <div className="trust-divider" />
-          <div className="trust-item">
-            <strong>100% Human Oversight</strong>
-            <span>Audit-ready governance</span>
-          </div>
+          <div className="preview-float-card preview-float-card--top"><Icon name="brain" size={17} /><span><strong>Intent detected</strong><small>Feature praise</small></span></div>
+          <div className="preview-float-card preview-float-card--bottom"><Icon name="shield" size={17} /><span><strong>Evidence grounded</strong><small>3 verified sources</small></span></div>
         </div>
       </section>
+
+      <section className="landing-proof-strip" aria-label="Platform highlights">
+        <div><strong>4</strong><span>specialized AI agents</span></div>
+        <div><strong>6+</strong><span>supported data sources</span></div>
+        <div><strong>100%</strong><span>human-governed responses</span></div>
+        <div><strong>24/7</strong><span>continuous intelligence</span></div>
+      </section>
+
+      <PublicPipelineDemo />
 
       {/* ---------------- LIVE SIMULATOR / INTERACTIVE DEMO ---------------- */}
       <section id="demo-section" className="landing-demo-section card">
@@ -273,6 +292,21 @@ function HomePage() {
         </div>
       </section>
 
+      <section className="landing-outcomes-section">
+        <div className="landing-outcomes-copy">
+          <span className="eyebrow">From noise to action</span>
+          <h2>One operating view for every conversation that matters.</h2>
+          <p>Move beyond volume charts. SignalOS connects the original mention, audience intent, trusted evidence, and a governed response so your team can act with context.</p>
+          <Link to={ROUTES.capabilities} className="landing-text-link">Explore all capabilities <Icon name="arrow" size={15} /></Link>
+        </div>
+        <div className="landing-outcomes-grid">
+          <article><span><Icon name="analyses" /></span><h3>Understand the why</h3><p>Go deeper than positive or negative with emotion, intent, entities, topics, and priority.</p></article>
+          <article><span><Icon name="knowledge" /></span><h3>Ground every claim</h3><p>Retrieve relevant knowledge and source context before insights or drafts are generated.</p></article>
+          <article><span><Icon name="shield" /></span><h3>Keep humans in control</h3><p>Review, edit, approve, or reject every response with a clear governance trail.</p></article>
+          <article><span><Icon name="alerts" /></span><h3>Focus on what matters</h3><p>Surface high-priority sentiment shifts and urgent conversations without losing context.</p></article>
+        </div>
+      </section>
+
       {/* ---------------- PRICING PLANS SECTION ---------------- */}
       <section id="pricing" className="landing-pricing-section">
         <div className="section-head text-center">
@@ -357,12 +391,11 @@ function HomePage() {
             <div
               key={index}
               className={`faq-item ${openFaq === index ? 'faq-item--open' : ''}`}
-              onClick={() => setOpenFaq(openFaq === index ? null : index)}
             >
-              <div className="faq-question">
+              <button type="button" className="faq-question" onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-expanded={openFaq === index}>
                 <strong>{faq.q}</strong>
                 <span className="faq-toggle">{openFaq === index ? '−' : '+'}</span>
-              </div>
+              </button>
               {openFaq === index && <p className="faq-answer">{faq.a}</p>}
             </div>
           ))}
