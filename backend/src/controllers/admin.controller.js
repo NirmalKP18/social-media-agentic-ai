@@ -13,6 +13,7 @@ import {
 } from '../services/admin.service.js'
 import { adminAdjustUsage, adminChangeUserPlan } from '../services/subscription.service.js'
 import { sendSuccess } from '../utils/apiResponse.js'
+import { listSecurityAssessmentCases, runSecurityAssessmentCase } from '../services/securityAssessment.service.js'
 
 export const getAnalytics = async (req, res) => {
   const analytics = await getAdminOverviewAnalytics()
@@ -80,4 +81,13 @@ export const getPipelineRuns = async (req, res) => {
     limit: req.query.limit,
   })
   sendSuccess(res, { runs, count: runs.length }, 'Admin pipeline runs retrieved successfully')
+}
+
+export const getSecurityAssessmentCases = async (req, res) => {
+  sendSuccess(res, { cases: listSecurityAssessmentCases() }, 'Security assessment cases retrieved successfully')
+}
+
+export const runSecurityAssessment = async (req, res) => {
+  const result = await runSecurityAssessmentCase(req.params.caseId)
+  sendSuccess(res, { result }, `${result.id} completed with outcome ${result.outcome}`)
 }

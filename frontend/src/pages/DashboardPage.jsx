@@ -457,6 +457,12 @@ function DashboardPage() {
     const query = workflowQuery.trim()
     if (!query) return
 
+    const selectedBrand = brands.find((brand) => brand._id === selectedBrandId)
+    if (!selectedBrand) {
+      setWorkflowError('Select a customer brand before running the pipeline.')
+      return
+    }
+
     if (isLimitReached) {
       setUpgradeReason(`You have reached your ${planName} plan pipeline limit (${usage.limit} runs). Upgrade your plan to continue monitoring.`)
       setShowUpgradeModal(true)
@@ -470,12 +476,12 @@ function DashboardPage() {
     setPipelineProgress(20)
 
     try {
-      const started = await workflowService.startRun({ query, limit: 10 })
+      const started = await workflowService.startRun({ query, limit: 10, brandId: selectedBrand._id })
       const data = started?.data || started
       if (data?.mode === 'sync' && data?.workflow) {
         setWorkflow(data.workflow)
         setPipelineProgress(100)
-        setWorkflowMessage(`Agent workflow completed! Processed ${data.workflow.agents?.nlp?.analyses || 0} analyses and found ${data.workflow.agents?.retrieval?.evidence || 0} evidence items.`)
+        setWorkflowMessage(`${selectedBrand.name} pipeline completed! Processed ${data.workflow.agents?.nlp?.analyses || 0} matching posts and found ${data.workflow.agents?.retrieval?.evidence || 0} evidence items.`)
         setWorkflowQuery('')
         await refreshUser()
         fetchData()
@@ -495,7 +501,7 @@ function DashboardPage() {
           if (result?.workflow) {
             setWorkflow(result.workflow)
             setPipelineProgress(100)
-            setWorkflowMessage(`Agent workflow completed! Found ${result.workflow.agents?.retrieval?.evidence || 0} evidence items.`)
+            setWorkflowMessage(`${selectedBrand.name} pipeline completed! Found ${result.workflow.agents?.retrieval?.evidence || 0} evidence items.`)
             setWorkflowQuery('')
             await refreshUser()
             fetchData()
@@ -508,12 +514,12 @@ function DashboardPage() {
         }
       }
 
-      const direct = await workflowService.run({ query, limit: 10 })
+      const direct = await workflowService.run({ query, limit: 10, brandId: selectedBrand._id })
       const directWf = direct?.data?.workflow || direct?.workflow
       if (directWf) {
         setWorkflow(directWf)
         setPipelineProgress(100)
-        setWorkflowMessage(`Agent workflow completed! Found ${directWf.agents?.retrieval?.evidence || 0} evidence items.`)
+        setWorkflowMessage(`${selectedBrand.name} pipeline completed! Found ${directWf.agents?.retrieval?.evidence || 0} evidence items.`)
         setWorkflowQuery('')
         await refreshUser()
         fetchData()
@@ -731,6 +737,34 @@ function DashboardPage() {
             </div>
 
             <form className="workflow-console__form" onSubmit={runWorkflow}>
+              <div className="workflow-brand-step">
+                <label htmlFor="workflow-brand-select">
+                  <span>1</span>
+                  Select customer brand
+                </label>
+                <select
+                  id="workflow-brand-select"
+                  value={selectedBrandId}
+                  onChange={(event) => {
+                    setSelectedBrandId(event.target.value)
+                    setWorkflowError(null)
+                  }}
+                  required
+                  disabled={workflowRunning || brands.length === 0}
+                >
+                  <option value="">Select a brand from collected posts...</option>
+                  {brands.map((brand) => (
+                    <option key={brand._id} value={brand._id}>
+                      {brand.name} — {brand.stats?.totalMentions || 0} matching posts
+                    </option>
+                  ))}
+                </select>
+                {brands.length === 0 && (
+                  <button type="button" className="workflow-add-brand-btn" onClick={() => setShowOnboarding(true)}>
+                    Add a brand first
+                  </button>
+                )}
+              </div>
               <div className="workflow-input-wrap">
                 <span className="workflow-input-icon">
                   <Icon name="sparkles" size={18} />
@@ -740,10 +774,11 @@ function DashboardPage() {
                   value={workflowQuery}
                   maxLength="200"
                   onChange={(event) => setWorkflowQuery(event.target.value)}
-                  placeholder="Enter brand name, keyword, or query (e.g., Nike product feedback & sentiment)..."
+                  placeholder="Enter what you want to analyze for the selected brand..."
                   required
+                  disabled={!selectedBrandId || workflowRunning}
                 />
-                <button type="submit" disabled={workflowRunning} className="workflow-submit-btn">
+                <button type="submit" disabled={workflowRunning || !selectedBrandId} className="workflow-submit-btn">
                   {workflowRunning ? 'Pipeline Running…' : 'Run Pipeline →'}
                 </button>
               </div>

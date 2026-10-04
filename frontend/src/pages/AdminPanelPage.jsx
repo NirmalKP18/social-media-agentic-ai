@@ -4,6 +4,7 @@ import Icon from '../components/common/Icon.jsx'
 import Loading from '../components/common/Loading.jsx'
 import ErrorMessage from '../components/common/ErrorMessage.jsx'
 import { formatDate } from '../utils/format.js'
+import SecurityTestingPanel from '../components/admin/SecurityTestingPanel.jsx'
 
 const DEFAULT_FALLBACK_USERS = [
   {
@@ -349,6 +350,14 @@ export default function AdminPanelPage() {
         >
           <Icon name="sparkles" size={16} />
           <span>Pipeline Telemetry ({pipelineRuns.length})</span>
+        </button>
+        <button
+          type="button"
+          className={`admin-tab-btn ${activeTab === 'security' ? 'admin-tab-btn--active' : ''}`}
+          onClick={() => setActiveTab('security')}
+        >
+          <Icon name="shield" size={16} />
+          <span>Security Testing</span>
         </button>
       </div>
 
@@ -832,6 +841,8 @@ export default function AdminPanelPage() {
           </div>
         </div>
       )}
+
+      {activeTab === 'security' && <SecurityTestingPanel showToast={showToast} />}
 
       {/* MODAL: Inspect User & Adjust Usage */}
       {showUserModal && selectedUser && (

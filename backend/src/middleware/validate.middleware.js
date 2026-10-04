@@ -156,7 +156,7 @@ const MAX_QUERY_LENGTH = 200
 const MAX_RESULTS_LIMIT = 20
 
 export const validateRetrievalSearch = (req, res, next) => {
-  const { query, limit } = req.body ?? {}
+  const { query, limit, brandId } = req.body ?? {}
 
   if (!query || typeof query !== 'string' || !query.trim()) {
     throw new HttpError('Search query is required', 400)
@@ -170,6 +170,12 @@ export const validateRetrievalSearch = (req, res, next) => {
     const parsedLimit = Number(limit)
     if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > MAX_RESULTS_LIMIT) {
       throw new HttpError(`Limit must be a whole number between 1 and ${MAX_RESULTS_LIMIT}`, 400)
+    }
+  }
+
+  if (brandId !== undefined && brandId !== null && brandId !== '') {
+    if (typeof brandId !== 'string' || !OBJECT_ID_PATTERN.test(brandId)) {
+      throw new HttpError('A valid brand ID is required', 400)
     }
   }
 

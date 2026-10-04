@@ -25,5 +25,7 @@ router.post('/plans', adminController.createPlan)
 router.put('/plans/:id', adminController.updatePlan)
 
 router.get('/pipeline-runs', adminController.getPipelineRuns)
+router.get('/security-assessment/cases', adminController.getSecurityAssessmentCases)
+router.post('/security-assessment/:caseId/run', adminController.runSecurityAssessment)
 
 export default router

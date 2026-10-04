@@ -1,4 +1,5 @@
 import SocialPost from '../models/SocialPost.js'
+import BrandProfile from '../models/BrandProfile.js'
 import Analysis from '../models/Analysis.js'
 import Alert from '../models/Alert.js'
 import Retrieval from '../models/Retrieval.js'
@@ -14,6 +15,28 @@ import { HttpError } from '../utils/httpError.js'
 
 const PERSIST_FIELDS = '_id platform author content publishedAt engagement comments'
 const HIGH_SEVERITY_SCORE = -0.6
+
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const getWorkflowPosts = async (userId, brandId = null) => {
+  const filter = { user: userId }
+  if (brandId) {
+    const brand = await BrandProfile.findOne({ _id: brandId, user: userId }).lean()
+    if (!brand) throw new HttpError('Brand profile not found', 404)
+
+    const keywords = [brand.primaryKeyword, ...(brand.alternativeKeywords || [])]
+      .map((keyword) => String(keyword || '').trim())
+      .filter(Boolean)
+    const keywordPatterns = keywords.map((keyword) => new RegExp(escapeRegex(keyword), 'i'))
+    filter.$or = [
+      { 'metadata.brandId': brand._id },
+      { content: { $in: keywordPatterns } },
+      { author: { $in: keywordPatterns } },
+    ]
+  }
+
+  return SocialPost.find(filter).select(PERSIST_FIELDS).lean()
+}
 
 const summarizeConversation = (commentAnalyses) => {
   const counts = { positive: 0, negative: 0, neutral: 0, score: 0 }
@@ -170,9 +193,11 @@ const buildWorkflow = async (userId, agentRun, query) => {
   }
 }
 
-export const runIntelligenceWorkflow = async (userId, { query, limit = 10 }) => {
-  const posts = await SocialPost.find({ user: userId }).select(PERSIST_FIELDS).lean()
-  if (posts.length === 0) throw new HttpError('Collect at least one post before running the workflow', 400)
+export const runIntelligenceWorkflow = async (userId, { query, limit = 10, brandId = null }) => {
+  const posts = await getWorkflowPosts(userId, brandId)
+  if (posts.length === 0) {
+    throw new HttpError(brandId ? 'No collected posts match the selected brand' : 'Collect at least one post before running the workflow', 400)
+  }
 
   const agentRun = await runAgentWorkflow({ posts, query, limit })
   if (!agentRun) return runNodeFallback(userId, { query, limit })
@@ -183,9 +208,11 @@ export const runIntelligenceWorkflow = async (userId, { query, limit = 10 }) => 
 export const executeWorkflow = runIntelligenceWorkflow
 
 
-export const startAgentRun = async (userId, { query, limit = 10 }) => {
-  const posts = await SocialPost.find({ user: userId }).select(PERSIST_FIELDS).lean()
-  if (posts.length === 0) throw new HttpError('Collect at least one post before running the workflow', 400)
+export const startAgentRun = async (userId, { query, limit = 10, brandId = null }) => {
+  const posts = await getWorkflowPosts(userId, brandId)
+  if (posts.length === 0) {
+    throw new HttpError(brandId ? 'No collected posts match the selected brand' : 'Collect at least one post before running the workflow', 400)
+  }
 
   try {
     const started = await startPipeline({ query: query.trim(), limit, posts: serializePosts(posts) })
@@ -197,7 +224,7 @@ export const startAgentRun = async (userId, { query, limit = 10 }) => {
     return { mode: 'async', job: started.job }
   } catch (error) {
     logger.error(`Async agent start unavailable (${error.message}); running the synchronous pipeline`)
-    const workflow = await runIntelligenceWorkflow(userId, { query, limit })
+    const workflow = await runIntelligenceWorkflow(userId, { query, limit, brandId })
     return { mode: 'sync', workflow }
   }
 }

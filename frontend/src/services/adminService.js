@@ -14,4 +14,6 @@ export const adminService = {
   createPlan: (data) => api.post('/admin/plans', data).then((res) => res.data),
   updatePlan: (id, data) => api.put(`/admin/plans/${id}`, data).then((res) => res.data),
   getPipelineRuns: (params) => api.get('/admin/pipeline-runs', { params }).then((res) => res.data),
+  getSecurityAssessmentCases: () => api.get('/admin/security-assessment/cases').then((res) => res.data),
+  runSecurityAssessment: (caseId) => api.post(`/admin/security-assessment/${caseId}/run`, null, { timeout: 90000 }).then((res) => res.data),
 }
