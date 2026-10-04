@@ -22,6 +22,13 @@ class Retriever:
         limit = max(1, min(limit, MAX_RESULTS))
         if not posts:
             return []
+        # Mention-detail runs search the mention using its own text. The only
+        # possible post match is therefore exact, so loading/running the large
+        # embedding model adds latency without changing the ranking.
+        normalized_query = query.strip().casefold()
+        normalized_content = posts[0].content.strip().casefold() if len(posts) == 1 else ""
+        if len(posts) == 1 and normalized_query and normalized_content.startswith(normalized_query):
+            return [Evidence("post", 1.0, post=posts[0])]
         try:
             from . import embeddings
             from .embeddings import EmbeddingUnavailable

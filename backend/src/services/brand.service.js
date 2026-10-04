@@ -7,9 +7,8 @@ import Plan from '../models/Plan.js'
 import User from '../models/User.js'
 import { HttpError } from '../utils/httpError.js'
 import { logger } from '../utils/logger.js'
-import { checkAndEnforcePipelineLimit, chargePipelineRun } from './subscription.service.js'
-import { executeWorkflow } from './workflow.service.js'
-import { analyzeText } from './nlpService.js'
+import { checkAndEnforcePipelineLimit } from './subscription.service.js'
+import { processMention } from './pipeline.service.js'
 
 const ensureValidId = (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -65,15 +64,17 @@ export const createBrand = async (userId, data) => {
   const user = await User.findById(userId)
   if (!user) throw new HttpError('User not found', 404)
 
-  // Check plan brand limit
-  const plan = (await Plan.findOne({ name: user.plan })) || { brandLimit: 1 }
-  const currentBrandCount = await BrandProfile.countDocuments({ user: userId })
+  // Administrators are subscription-exempt; plan brand limits only apply to customers.
+  if (user.role !== 'admin') {
+    const plan = (await Plan.findOne({ name: user.plan })) || { brandLimit: 1 }
+    const currentBrandCount = await BrandProfile.countDocuments({ user: userId })
 
-  if (currentBrandCount >= (plan.brandLimit || 1)) {
-    throw new HttpError(
-      `Your ${user.plan} plan allows up to ${plan.brandLimit} brand profile(s). Upgrade to add more brands.`,
-      403,
-    )
+    if (currentBrandCount >= (plan.brandLimit || 1)) {
+      throw new HttpError(
+        `Your ${user.plan} plan allows up to ${plan.brandLimit} brand profile(s). Upgrade to add more brands.`,
+        403,
+      )
+    }
   }
 
   const { name, type = 'brand', primaryKeyword, alternativeKeywords = [], platforms = ['x', 'reddit', 'linkedin'], description, website, competitors = [] } = data
@@ -172,12 +173,10 @@ export const runBrandMonitoringPipeline = async (userId, brandId) => {
 
   // 3. Execute full 4-Agent Autonomous Workflow Pipeline
   logger.info(`Starting brand monitoring pipeline for '${brand.name}' on mention ${targetPost._id}`)
-  const workflowResult = await executeWorkflow(userId, targetPost._id)
+  const pipelineRun = await processMention(userId, targetPost._id)
 
-  // 4. Charge 1 pipeline run against the user's plan allowance
-  const updatedUsage = await chargePipelineRun(userId)
-
-  // 5. Update brand profile statistics
+  // 4. Update brand profile statistics. processMention owns the quota charge,
+  // so one click always consumes exactly one pipeline run.
   const brandPosts = await SocialPost.find({
     user: userId,
     $or: [
@@ -215,11 +214,18 @@ export const runBrandMonitoringPipeline = async (userId, brandId) => {
   brand.lastAnalyzedAt = new Date()
   await brand.save()
 
+  const updatedUser = await User.findById(userId).select('pipelineUsage role').lean()
+  const isSubscriptionExempt = updatedUser?.role === 'admin'
+
   return {
     success: true,
     brand,
-    workflowResult,
-    usage: updatedUsage,
-    message: `Monitoring pipeline completed successfully for '${brand.name}' (1 run charged).`,
+    pipelineRun,
+    workflowResult: pipelineRun,
+    mentionsCount: 1,
+    usage: updatedUser?.pipelineUsage || null,
+    message: isSubscriptionExempt
+      ? `Monitoring pipeline completed successfully for '${brand.name}' (admin access; no run charged).`
+      : `Monitoring pipeline completed successfully for '${brand.name}' (1 run charged).`,
   }
 }

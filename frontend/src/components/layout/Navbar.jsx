@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { to: ROUTES.insights, label: 'AI Insights & Reports', icon: 'insights' },
   { to: ROUTES.pipelineHistory, label: 'Pipeline History', icon: 'logs' },
   { to: ROUTES.alerts, label: 'Alerts', icon: 'alerts' },
-  { to: ROUTES.subscription, label: 'Subscription & Billing', icon: 'creditCard' },
+  { to: ROUTES.subscription, label: 'Subscription & Billing', icon: 'creditCard', customerOnly: true },
   { to: ROUTES.connections, label: 'Connections', icon: 'connections' },
   { to: ROUTES.evaluation, label: 'System Evaluation', icon: 'evaluation' },
   { to: ROUTES.knowledge, label: 'Knowledge Base', icon: 'knowledge', adminOnly: true },
@@ -71,7 +71,7 @@ function Navbar({ collapsed = false, onCollapse }) {
 
             {/* Workspace Navigation Menu */}
             <ul className="navbar__links">
-              {NAV_ITEMS.filter((item) => !item.adminOnly || user.role === 'admin').map((item) => (
+              {NAV_ITEMS.filter((item) => (!item.adminOnly || user.role === 'admin') && (!item.customerOnly || user.role !== 'admin')).map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
@@ -89,7 +89,7 @@ function Navbar({ collapsed = false, onCollapse }) {
             </ul>
 
             {/* Quota Meter & Plan Badge in Sidebar */}
-            {!collapsed && (
+            {!collapsed && user.role !== 'admin' && (
               <div className="navbar__quota-card">
                 <div className="navbar__quota-top">
                   <span className={`saas-badge saas-badge--${(user.plan || 'free').toLowerCase()}`}>

@@ -1,4 +1,4 @@
-import { processMention, startMentionProcessing, listRuns, getRun } from '../services/pipeline.service.js'
+import { processMention, startMentionProcessing, stopMentionProcessing, listRuns, getRun } from '../services/pipeline.service.js'
 import { sendSuccess } from '../utils/apiResponse.js'
 
 export const process = async (req, res) => {
@@ -23,4 +23,9 @@ export const list = async (req, res) => {
 export const get = async (req, res) => {
   const run = await getRun(req.user.id, req.params.id)
   sendSuccess(res, { run }, 'Pipeline run retrieved')
+}
+
+export const stop = async (req, res) => {
+  const run = await stopMentionProcessing(req.user.id, req.params.id)
+  sendSuccess(res, { run }, 'Pipeline run stopped')
 }

@@ -25,6 +25,11 @@ const STAGE_ACTION = {
 
 const clampScore = (value) => Math.max(0, Math.min(1, Number(value) || 0))
 
+const isRunCancelled = async (runId) => {
+  const current = await PipelineRun.findById(runId).select('status').lean()
+  return !current || current.status === 'cancelled'
+}
+
 const waitForJob = async (jobId, onProgress = null) => {
   const deadline = Date.now() + POLL_TIMEOUT_MS
   let lastTransitionCount = 0
@@ -177,6 +182,7 @@ export const processMention = async (userId, postId, existingRun = null) => {
         }
         return syncProgress(run, job)
       })
+      if (await isRunCancelled(run._id)) return getRun(userId, run._id)
     }
   } catch (error) {
     logger.warn(`External Python agent microservice offline (${error.message}). Executing Node Multi-Agent Engine.`)
@@ -354,8 +360,11 @@ export const processMention = async (userId, postId, existingRun = null) => {
   const insight = await generateInsight(
     userId,
     { retrievalId: retrieval._id },
-    { post: post._id, pipelineRun: run._id },
+    // Keep the live mention pipeline predictable; explicit report generation
+    // can still use the external LLM for higher-quality wording.
+    { post: post._id, pipelineRun: run._id, useExternalLlm: false },
   )
+  if (await isRunCancelled(run._id)) return getRun(userId, run._id)
   run.stages.generation = 'success'
   run.status = 'completed'
   run.completedAt = new Date()
@@ -414,6 +423,24 @@ export const startMentionProcessing = async (userId, postId) => {
   })
   processMention(userId, postId, run).catch((error) => logger.error(`Background pipeline ${run._id} failed: ${error.message}`))
   return getRun(userId, run._id)
+}
+
+export const stopMentionProcessing = async (userId, runId) => {
+  if (!String(runId).match(/^[0-9a-fA-F]{24}$/)) throw new HttpError('Pipeline run not found', 404)
+  const stoppedAt = new Date()
+  const run = await PipelineRun.findOneAndUpdate(
+    { _id: runId, user: userId, status: 'processing' },
+    {
+      $set: { status: 'cancelled', completedAt: stoppedAt, error: 'Stopped by user' },
+      $push: { events: { event: 'PIPELINE_CANCELLED', agent: 'system', timestamp: stoppedAt, status: 'cancelled' } },
+    },
+    { returnDocument: 'after' },
+  )
+  if (!run) {
+    const existing = await PipelineRun.findOne({ _id: runId, user: userId })
+    if (!existing) throw new HttpError('Pipeline run not found', 404)
+  }
+  return getRun(userId, runId)
 }
 
 const RUN_POPULATE = [

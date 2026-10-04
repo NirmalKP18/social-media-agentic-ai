@@ -114,6 +114,7 @@ userSchema.methods.toSafeJSON = function toSafeJSON() {
     role: this.role,
     plan: this.plan || 'Free',
     subscriptionStatus: this.subscriptionStatus || 'active',
+    isSubscriptionExempt: this.role === 'admin',
     pipelineUsage: {
       limit: usage.limit ?? 20,
       used: usage.used ?? 0,

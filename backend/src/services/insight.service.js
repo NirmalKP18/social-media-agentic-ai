@@ -250,7 +250,7 @@ const buildReport = ({ posts, analyses, groundedQuery }) => {
 export const generateInsight = async (
   userId,
   { retrievalId } = {},
-  { agentInsight = null, job = null, post = null, pipelineRun = null } = {},
+  { agentInsight = null, job = null, post = null, pipelineRun = null, useExternalLlm = true } = {},
 ) => {
   const { postIds, retrieval, groundedQuery } = await getScope(userId, retrievalId)
 
@@ -292,6 +292,7 @@ export const generateInsight = async (
         evidence: evidencePosts.map((post) => ({ id: String(post._id), content: post.content })),
         comments: readComments,
         knowledgeSources,
+        useExternalLlm,
       })
 
   const overrides = agentInsight

@@ -6,5 +6,5 @@ export const brandsService = {
   createBrand: (data) => api.post('/brands', data),
   updateBrand: (id, data) => api.put(`/brands/${id}`, data),
   deleteBrand: (id) => api.delete(`/brands/${id}`),
-  runBrandPipeline: (id) => api.post(`/brands/${id}/run`),
+  runBrandPipeline: (id) => api.post(`/brands/${id}/run`, {}, { timeout: 180000 }),
 }

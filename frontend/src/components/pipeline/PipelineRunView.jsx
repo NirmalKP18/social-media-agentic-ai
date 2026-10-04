@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../common/Icon.jsx'
 import ErrorMessage from '../common/ErrorMessage.jsx'
@@ -68,22 +68,42 @@ function PipelineRunView({ run }) {
   const [view, setView] = useState('visual')
   const [selected, setSelected] = useState(null)
 
+  const serverCompletedCount = STAGES.reduce(
+    (count, stage) => (run?.stages?.[stage.key] === 'success' && count === STAGES.indexOf(stage) ? count + 1 : count),
+    0,
+  )
+  const [revealedStages, setRevealedStages] = useState(() => run?.status === 'processing' ? 0 : serverCompletedCount)
+
+  useEffect(() => {
+    setRevealedStages(run?.status === 'processing' ? 0 : serverCompletedCount)
+    // Only reset when a different run is selected. Stage updates for the same
+    // run are revealed by the paced effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run?._id])
+
+  useEffect(() => {
+    if (revealedStages >= serverCompletedCount) return undefined
+    const timer = window.setTimeout(() => setRevealedStages((count) => count + 1), 2800)
+    return () => window.clearTimeout(timer)
+  }, [revealedStages, serverCompletedCount])
+
   if (!run) return null
 
   const failedKey = run.failedStage?.toLowerCase()
-  const firstPending = STAGES.find((stage) => run.stages?.[stage.key] === 'pending')?.key
-
-  const statusFor = (key) =>
-    failedKey === key
+  const statusFor = (key) => {
+    const index = STAGES.findIndex((stage) => stage.key === key)
+    return failedKey === key
       ? 'failed'
-      : run.stages?.[key] === 'success'
+      : index < revealedStages
       ? 'completed'
-      : run.status === 'processing' && firstPending === key
+      : index === revealedStages && (run.status === 'processing' || revealedStages < serverCompletedCount)
       ? 'running'
       : 'pending'
+  }
 
   const active = STAGES.find((stage) => statusFor(stage.key) === 'running')
-  const completedCount = STAGES.filter((stage) => statusFor(stage.key) === 'completed').length
+  const completedCount = revealedStages
+  const visuallyComplete = run.status === 'completed' && revealedStages === STAGES.length
   const events = run.events || []
   const knowledge = run.retrieval?.knowledge || []
   const runFill = deriveRunStages(run)
@@ -127,10 +147,12 @@ function PipelineRunView({ run }) {
             Autonomous Agent Orchestration Engine
           </span>
           <h2>
-            {run.status === 'completed'
+            {visuallyComplete
               ? '✅ Pipeline Execution Completed'
               : run.status === 'failed'
               ? '❌ Pipeline Interrupted'
+              : run.status === 'cancelled'
+              ? 'Pipeline stopped by user'
               : `⚡ Executing Mention #${run._id ? run._id.slice(-6) : 'LIVE'}`}
           </h2>
           <p>

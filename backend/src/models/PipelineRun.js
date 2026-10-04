@@ -17,7 +17,7 @@ const pipelineRunSchema = new mongoose.Schema(
     jobId: { type: String, default: '' },
     status: {
       type: String,
-      enum: ['processing', 'completed', 'failed'],
+      enum: ['processing', 'completed', 'failed', 'cancelled'],
       default: 'processing',
     },
     stages: {

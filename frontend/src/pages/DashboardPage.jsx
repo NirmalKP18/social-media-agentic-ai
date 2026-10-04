@@ -6,12 +6,15 @@ import ErrorMessage from '../components/common/ErrorMessage.jsx'
 import GettingStartedChecklist from '../components/onboarding/GettingStartedChecklist.jsx'
 import UpgradeModal from '../components/common/UpgradeModal.jsx'
 import OnboardingWizardModal from '../components/onboarding/OnboardingWizardModal.jsx'
+import PipelineRunView from '../components/pipeline/PipelineRunView.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { dashboardService } from '../services/dashboardService.js'
 import { workflowService } from '../services/workflowService.js'
+import { pipelineService } from '../services/pipelineService.js'
 import { brandsService } from '../services/brandsService.js'
 import { ROUTES } from '../constants/routes.js'
 import Icon from '../components/common/Icon.jsx'
+import { formatDate } from '../utils/format.js'
 
 function StatCard({ label, value, iconName, tone, trend, isPositive = true, note }) {
   return (
@@ -261,6 +264,56 @@ function LiveTrackingWidget({ recentPosts = [] }) {
   )
 }
 
+const DEMO_AGENTS = [
+  { code: 'CORE-01', type: 'Intake Turbine', name: 'Collection Agent', subtitle: 'Data Ingestion & Cleaning', icon: 'engineIngest', task: 'Cleaning and normalizing mention text' },
+  { code: 'CORE-02', type: 'Neural Matrix', name: 'NLP Intelligence Agent', subtitle: 'NER & Sentiment Classification', icon: 'engineNlp', task: 'Scoring sentiment, intent and entities' },
+  { code: 'CORE-03', type: 'Vector Reactor', name: 'Retrieval / RAG Agent', subtitle: 'Semantic Evidence Search', icon: 'engineRag', task: 'Retrieving grounded supporting evidence' },
+  { code: 'CORE-04', type: 'Synthesis Core', name: 'Generation Agent', subtitle: 'Grounded Insight & Draft PR', icon: 'engineSynthesis', task: 'Creating a review-ready response draft' },
+]
+
+function PipelineProcessDemo() {
+  const [activeAgent, setActiveAgent] = useState(0)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setActiveAgent((current) => (current + 1) % DEMO_AGENTS.length), 4000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  return (
+    <section className="flow-card pipeline-demo" aria-label="Four-agent pipeline process demonstration">
+      <div className="flow-card__head pipeline-demo__head">
+        <div>
+          <div className="card-title-row"><span className="live-indicator-dot" /><h3>How the Agent Pipeline Works</h3></div>
+          <small>A slow looping demonstration of one mention moving through all four intelligence agents.</small>
+        </div>
+        <span className="pipeline-demo__loop">Live process demo</span>
+      </div>
+      <div className="pipeline-demo__rail">
+        {DEMO_AGENTS.map((agent, index) => {
+          const state = index < activeAgent ? 'complete' : index === activeAgent ? 'active' : 'waiting'
+          return (
+            <article className={`pipeline-demo__agent pipeline-demo__agent--${state}`} key={agent.code}>
+              <div className="pipeline-demo__agent-top">
+                <span className="engine-code-badge"><b className="engine-code">{agent.code}</b><span className="engine-tag">{agent.type}</span></span>
+                <span className="pipeline-demo__state"><i />{state === 'active' ? 'Active engine' : state === 'complete' ? 'Synced' : 'Standby'}</span>
+              </div>
+              <div className="engine-housing">
+                <div className={`engine-turbine engine-turbine--${state === 'complete' ? 'completed' : state === 'active' ? 'running' : 'pending'}`}>
+                  <div className="engine-turbine__ring-outer" /><div className="engine-turbine__ring-inner" />
+                  <div className="engine-turbine__core"><Icon name={agent.icon} size={22} /></div>
+                </div>
+                <div className="engine-housing__meta"><strong>{agent.name}</strong><p>{agent.subtitle}</p></div>
+              </div>
+              <div className="pipeline-demo__progress"><i /></div>
+              <small>{state === 'active' ? agent.task : state === 'complete' ? 'Stage completed successfully' : 'Waiting for agent handoff'}</small>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function DashboardPage() {
   const { user, refreshUser } = useAuth()
   const navigate = useNavigate()
@@ -280,6 +333,10 @@ function DashboardPage() {
   const [workflow, setWorkflow] = useState(null)
   const [pipelineProgress, setPipelineProgress] = useState(0)
   const abortRef = useRef(false)
+
+  const [pipelineRuns, setPipelineRuns] = useState([])
+  const [selectedRunId, setSelectedRunId] = useState('')
+  const [stoppingRunId, setStoppingRunId] = useState('')
 
   useEffect(() => () => { abortRef.current = true }, [])
 
@@ -307,10 +364,47 @@ function DashboardPage() {
     fetchData()
   }, [fetchData])
 
+  const loadPipelineRuns = useCallback(async () => {
+    try {
+      const response = await pipelineService.listRuns({ limit: 20 })
+      const runs = response.data?.runs || []
+      setPipelineRuns(runs)
+      setSelectedRunId((current) => (runs.some((run) => run._id === current) ? current : runs[0]?._id || ''))
+    } catch {
+      setPipelineRuns([])
+    }
+  }, [])
+
+  useEffect(() => {
+    loadPipelineRuns()
+  }, [loadPipelineRuns])
+
+  useEffect(() => {
+    if (!pipelineRuns.some((run) => run.status === 'processing')) return undefined
+    const timer = window.setInterval(loadPipelineRuns, 1500)
+    return () => window.clearInterval(timer)
+  }, [pipelineRuns, loadPipelineRuns])
+
+  const selectedRun = pipelineRuns.find((run) => run._id === selectedRunId) || null
+
+  const stopSelectedRun = async () => {
+    if (!selectedRun?._id || stoppingRunId) return
+    setStoppingRunId(selectedRun._id)
+    try {
+      await pipelineService.stopRun(selectedRun._id)
+      await loadPipelineRuns()
+    } catch (err) {
+      setWorkflowError(err.message || 'Unable to stop the pipeline.')
+    } finally {
+      setStoppingRunId('')
+    }
+  }
+
   // Quota extraction
   const usage = user?.pipelineUsage || { limit: 20, used: 0, remaining: 20 }
   const planName = (user?.plan || 'free').toUpperCase()
-  const isLimitReached = usage.remaining <= 0
+  const isSubscriptionExempt = user?.role === 'admin' || user?.isSubscriptionExempt
+  const isLimitReached = !isSubscriptionExempt && usage.remaining <= 0
 
   const handleRunBrandPipeline = async (brandId) => {
     if (isLimitReached) {
@@ -329,14 +423,21 @@ function DashboardPage() {
     setWorkflowMessage('')
     setWorkflow(null)
     setWorkflowRunning(true)
-    setPipelineProgress(15)
+    setPipelineProgress(5)
+
+    const progressTimer = window.setInterval(() => {
+      setPipelineProgress((current) => Math.min(92, current + (current < 35 ? 7 : current < 70 ? 4 : 2)))
+      loadPipelineRuns()
+    }, 900)
 
     try {
       const response = await brandsService.runBrandPipeline(targetBrand._id)
       setPipelineProgress(100)
-      setWorkflowMessage(`Pipeline successfully finished for ${targetBrand.name}! Processed ${response.data?.mentionsCount || 0} mentions.`)
+      const result = response.data?.data || response.data || {}
+      setWorkflow(result.workflowResult || null)
+      setWorkflowMessage(`Pipeline successfully finished for ${targetBrand.name}. Processed ${result.mentionsCount || 1} mention and completed all four agents.`)
       await refreshUser()
-      fetchData()
+      await Promise.all([fetchData(), loadPipelineRuns()])
     } catch (err) {
       const msg = err.response?.data?.message || err.message
       if (err.response?.status === 403 || msg?.includes('limit reached')) {
@@ -346,6 +447,7 @@ function DashboardPage() {
         setWorkflowError(msg || 'Pipeline execution failed.')
       }
     } finally {
+      window.clearInterval(progressTimer)
       setWorkflowRunning(false)
     }
   }
@@ -377,6 +479,7 @@ function DashboardPage() {
         setWorkflowQuery('')
         await refreshUser()
         fetchData()
+        loadPipelineRuns()
         return
       }
 
@@ -396,6 +499,7 @@ function DashboardPage() {
             setWorkflowQuery('')
             await refreshUser()
             fetchData()
+            loadPipelineRuns()
             return
           }
           if (result?.status === 'failed') {
@@ -413,6 +517,7 @@ function DashboardPage() {
         setWorkflowQuery('')
         await refreshUser()
         fetchData()
+        loadPipelineRuns()
         return
       }
 
@@ -456,11 +561,11 @@ function DashboardPage() {
 
           <div className="saas-plan-meta">
             <span className={`saas-badge saas-badge--${user.plan || 'free'}`}>
-              <Icon name="bolt" size={13} /> {planName} PLAN
+              <Icon name="bolt" size={13} /> {isSubscriptionExempt ? 'ADMIN ACCESS' : `${planName} PLAN`}
             </span>
 
             {/* Pipeline Usage Pill */}
-            <div className="saas-usage-pill" title={`Limit: ${usage.limit}, Used: ${usage.used}, Remaining: ${usage.remaining}`}>
+            {!isSubscriptionExempt && <div className="saas-usage-pill" title={`Limit: ${usage.limit}, Used: ${usage.used}, Remaining: ${usage.remaining}`}>
               <div className="saas-usage-pill__header">
                 <strong>Pipeline Usage:</strong>
                 <span>{usage.used} / {usage.limit} Used ({usage.remaining} Runs Remaining)</span>
@@ -471,9 +576,9 @@ function DashboardPage() {
                   style={{ width: `${Math.min(100, Math.round((usage.used / Math.max(1, usage.limit)) * 100))}%` }}
                 />
               </div>
-            </div>
+            </div>}
 
-            {user.plan !== 'premium' && (
+            {!isSubscriptionExempt && user.plan !== 'premium' && (
               <button
                 type="button"
                 className="saas-upgrade-btn"
@@ -602,6 +707,8 @@ function DashboardPage() {
           {/* Persistent Onboarding Checklist */}
           <GettingStartedChecklist posts={recentPosts} insights={dashboard?.latestInsight ? [dashboard.latestInsight] : []} />
 
+          <PipelineProcessDemo />
+
           {/* Real-time Agent Command Console */}
           <section className="flow-card flow-workflow-console">
             <div className="workflow-console__head">
@@ -686,6 +793,66 @@ function DashboardPage() {
                 <span>⚠️ {workflowError}</span>
                 <button type="button" onClick={() => setWorkflowError(null)}>×</button>
               </div>
+            )}
+          </section>
+
+          {/* Agentic Pipeline Live Trace */}
+          <section className="posts-section">
+            <div className="panel-head">
+              <div>
+                <span className="eyebrow">Autonomous Orchestration</span>
+                <h2>Agentic Pipeline Live Trace</h2>
+                <small>Watch CORE-01 to CORE-04 transform raw mentions into grounded, review-ready intelligence.</small>
+              </div>
+              <div className="flex-center gap-2">
+                {selectedRun?.status === 'processing' && (
+                  <button type="button" className="btn btn--danger" onClick={stopSelectedRun} disabled={Boolean(stoppingRunId)}>
+                    {stoppingRunId ? 'Stopping...' : 'Stop pipeline'}
+                  </button>
+                )}
+                <button type="button" className="btn" onClick={loadPipelineRuns}>Refresh</button>
+                <Link to={ROUTES.agentWorkflow} className="flow-link">
+                  Full Workflow View →
+                </Link>
+              </div>
+            </div>
+
+            {pipelineRuns.length === 0 ? (
+              <p className="empty-state">
+                No pipeline runs recorded yet. Run the monitoring pipeline above, or open a mention and choose
+                &ldquo;Run full pipeline&rdquo; to watch the agents work.
+              </p>
+            ) : (
+              <>
+                <div className="runs-table" role="table">
+                  <div role="row" className="runs-table__head">
+                    <span>Mention</span>
+                    <span>Progress</span>
+                    <span>Started</span>
+                    <span>Status</span>
+                  </div>
+                  {pipelineRuns.map((run) => {
+                    const progress = Object.values(run.stages || {}).filter((value) => value === 'success').length
+                    return (
+                      <button
+                        role="row"
+                        key={run._id}
+                        className={selectedRunId === run._id ? 'selected' : ''}
+                        onClick={() => setSelectedRunId(run._id)}
+                      >
+                        <span>
+                          <strong>{run.post?.content || `Mention #${run._id.slice(-6)}`}</strong>
+                          <small>{run.post?.platform || 'source'}</small>
+                        </span>
+                        <span>{progress} / 4 agents</span>
+                        <span>{formatDate(run.startedAt)}</span>
+                        <span className={`badge badge--${run.status}`}>{run.status}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                {selectedRun && <PipelineRunView run={selectedRun} />}
+              </>
             )}
           </section>
 

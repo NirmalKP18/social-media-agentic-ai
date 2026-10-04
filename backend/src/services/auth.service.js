@@ -73,8 +73,9 @@ export const loginUser = async ({ email, password }) => {
     throw new HttpError(`Your account has been suspended by an administrator.${reasonText}`, 403)
   }
 
-  user.lastLoginAt = new Date()
-  await user.save()
+  const lastLoginAt = new Date()
+  user.lastLoginAt = lastLoginAt
+  await User.updateOne({ _id: user._id }, { $set: { lastLoginAt } })
 
   return {
     user: user.toSafeJSON(),

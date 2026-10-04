@@ -107,8 +107,8 @@ function OnboardingWizardModal({ isOpen, onClose, onComplete }) {
   }
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal onboarding-wizard-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop onboarding-wizard-backdrop">
+      <div className="modal onboarding-wizard-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" onClick={(e) => e.stopPropagation()}>
         {/* Progress Bar */}
         <div className="wizard-progress-bar">
           <div className="wizard-progress-fill" style={{ width: `${(step / 5) * 100}%` }} />
@@ -116,8 +116,11 @@ function OnboardingWizardModal({ isOpen, onClose, onComplete }) {
 
         {/* Step Header */}
         <div className="wizard-header">
-          <div className="wizard-step-tag">STEP {step} OF 5</div>
-          <button className="modal__close" onClick={onClose} title="Skip Setup">
+          <div>
+            <div className="wizard-step-tag">Workspace setup</div>
+            <div className="wizard-step-count">Step {step} of 5</div>
+          </div>
+          <button type="button" className="modal__close" onClick={onClose} title="Skip setup" aria-label="Close setup wizard">
             ✕
           </button>
         </div>
@@ -130,27 +133,27 @@ function OnboardingWizardModal({ isOpen, onClose, onComplete }) {
             <div className="wizard-hero-icon">
               <Icon name="sparkles" size={32} />
             </div>
-            <h2>Welcome to SignalOS!</h2>
+            <h2 id="onboarding-title">Welcome to SignalOS</h2>
             <p className="wizard-subtitle">
               Hello <strong>{user?.name || 'there'}</strong>! Let's set up your intelligence workspace in less than 60 seconds.
             </p>
             <div className="wizard-features-preview">
               <div className="wizard-feature-pill">
-                <span>🛰️</span>
+                <span className="wizard-feature-icon"><Icon name="collection" size={20} /></span>
                 <div>
                   <strong>Multi-Channel Ingestion</strong>
                   <small>Capture posts across social networks</small>
                 </div>
               </div>
               <div className="wizard-feature-pill">
-                <span>🧠</span>
+                <span className="wizard-feature-icon"><Icon name="brain" size={20} /></span>
                 <div>
                   <strong>4-Agent AI Engine</strong>
                   <small>Clean, score sentiment, retrieve facts & draft responses</small>
                 </div>
               </div>
               <div className="wizard-feature-pill">
-                <span>⚡</span>
+                <span className="wizard-feature-icon"><Icon name="bolt" size={20} /></span>
                 <div>
                   <strong>{user?.pipelineUsage?.limit || 20} Free Pipeline Runs</strong>
                   <small>Assigned to your account ready to explore</small>
@@ -160,7 +163,7 @@ function OnboardingWizardModal({ isOpen, onClose, onComplete }) {
 
             <div className="wizard-footer">
               <button type="button" className="btn btn--primary btn--lg" onClick={() => setStep(2)}>
-                Get Started ➔
+                Get started <span aria-hidden="true">→</span>
               </button>
             </div>
           </div>

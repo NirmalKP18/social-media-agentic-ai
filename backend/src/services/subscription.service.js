@@ -122,6 +122,7 @@ export const getUserSubscription = async (userId) => {
   const limit = usage.limit ?? plan.pipelineLimit ?? 20
   const used = usage.used ?? 0
   const remaining = Math.max(0, limit - used)
+  const isSubscriptionExempt = user.role === 'admin'
 
   return {
     user: user.toSafeJSON(),
@@ -146,7 +147,8 @@ export const getUserSubscription = async (userId) => {
     },
     brandCount,
     payments,
-    isAtLimit: remaining <= 0,
+    isSubscriptionExempt,
+    isAtLimit: !isSubscriptionExempt && remaining <= 0,
   }
 }
 
@@ -156,6 +158,12 @@ export const checkAndEnforcePipelineLimit = async (userId) => {
 
   if (user.status === 'suspended') {
     throw new HttpError('Your account has been suspended. Please contact platform support.', 403)
+  }
+
+  // Administrators operate the platform itself and are not subscription customers.
+  // Keep account suspension enforcement above, but bypass all plan quotas here.
+  if (user.role === 'admin') {
+    return { allowed: true, unlimited: true }
   }
 
   const planName = user.plan || 'Free'
@@ -194,6 +202,11 @@ export const checkAndEnforcePipelineLimit = async (userId) => {
 export const chargePipelineRun = async (userId) => {
   const user = await User.findById(userId)
   if (!user) return
+
+  if (user.role === 'admin') {
+    logger.info(`Skipped pipeline charge for subscription-exempt admin ${user.email}.`)
+    return user.pipelineUsage
+  }
 
   if (!user.pipelineUsage) {
     user.pipelineUsage = { limit: 20, used: 0, remaining: 20 }

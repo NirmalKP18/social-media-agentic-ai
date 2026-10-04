@@ -36,6 +36,7 @@ function PostDetailPage() {
   const [run, setRun] = useState(null)
   const [runLoading, setRunLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
+  const [stopping, setStopping] = useState(false)
   const [runError, setRunError] = useState(null)
 
   useEffect(() => {
@@ -87,6 +88,21 @@ function PostDetailPage() {
       }
     } finally {
       setProcessing(false)
+    }
+  }
+
+  const handleStop = async () => {
+    if (!run?._id || stopping) return
+    setStopping(true)
+    setRunError(null)
+    try {
+      const response = await pipelineService.stopRun(run._id)
+      setRun(response.data.run)
+      setProcessing(false)
+    } catch (err) {
+      setRunError(err.message)
+    } finally {
+      setStopping(false)
     }
   }
 
@@ -318,6 +334,11 @@ function PostDetailPage() {
           <button type="button" className="btn btn--primary" onClick={handleProcess} disabled={processing || runLoading || run?.status === 'processing'}>
             {processing ? 'Agents working…' : run ? 'Re-run full pipeline' : 'Run full pipeline'}
           </button>
+          {run?.status === 'processing' && (
+            <button type="button" className="btn btn--danger" onClick={handleStop} disabled={stopping}>
+              {stopping ? 'Stopping...' : 'Stop pipeline'}
+            </button>
+          )}
         </div>
         <p className="analysis-date">
           The four agents process this mention end-to-end: clean the text, score its sentiment and intent, rank credible supporting evidence from your collection and knowledge base, then draft a review-ready response.

@@ -44,6 +44,15 @@ export const ensureAdminAccount = async () => {
       existingAdmin.role = 'admin'
       existingAdmin.plan = 'Premium'
       existingAdmin.status = 'active'
+
+      // Self-heal legacy documents that hold a subscriptionStatus outside the schema enum,
+      // otherwise every later save() on this account fails validation and locks out login.
+      const allowedSubscriptionStatuses = User.schema.path('subscriptionStatus').enumValues
+      if (!allowedSubscriptionStatuses.includes(existingAdmin.subscriptionStatus)) {
+        logger.warn(`Normalizing out-of-enum subscriptionStatus "${existingAdmin.subscriptionStatus}" on ${adminEmail}`)
+        existingAdmin.subscriptionStatus = 'active'
+      }
+
       const matches = await bcrypt.compare(adminPassword, existingAdmin.password)
       if (!matches) {
         existingAdmin.password = adminPassword

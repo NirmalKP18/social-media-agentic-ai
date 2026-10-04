@@ -2,14 +2,8 @@ import { config } from '../config/env.js'
 import { logger } from '../utils/logger.js'
 
 const CANDIDATE_LLM_MODELS = [
-  config.llm.model || 'gemini-3.6-flash',
-  'gemini-3.6-flash',
-  'gemini-3.1-flash-lite',
-  'gemini-3.7-flash',
-  'gemini-3.5-flash-lite',
-  'gemini-3.5-flash',
+  config.llm.model || 'gemini-flash-latest',
   'gemini-flash-latest',
-  'gemini-3.8-flash',
 ]
 
 const localFallback = ({ query, evidence, negativeTopic, comments = [] }) => {
@@ -43,8 +37,8 @@ const parseJson = (text) => {
   return JSON.parse(jsonMatch[0])
 }
 
-export const generateGroundedDraft = async ({ query, evidence = [], negativeTopic, comments = [], knowledgeSources = [] }) => {
-  if (!config.llm.apiKey || (evidence.length === 0 && comments.length === 0)) {
+export const generateGroundedDraft = async ({ query, evidence = [], negativeTopic, comments = [], knowledgeSources = [], useExternalLlm = true }) => {
+  if (!useExternalLlm || !config.llm.apiKey || (evidence.length === 0 && comments.length === 0)) {
     return localFallback({ query, evidence, negativeTopic, comments })
   }
 
@@ -94,11 +88,14 @@ CRITICAL INSTRUCTIONS:
   }
 
   const modelsToTry = [...new Set(CANDIDATE_LLM_MODELS.filter(Boolean))]
+  const deadline = Date.now() + Math.max(1000, config.llm.timeoutMs || 8000)
   let lastError = null
 
   for (const modelName of modelsToTry) {
+    const remainingMs = deadline - Date.now()
+    if (remainingMs <= 0) break
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), config.llm.timeoutMs || 25000)
+    const timer = setTimeout(() => controller.abort(), remainingMs)
 
     try {
       const url = `${config.llm.baseUrl}/models/${encodeURIComponent(modelName)}:generateContent?key=${encodeURIComponent(config.llm.apiKey)}`
@@ -116,7 +113,11 @@ CRITICAL INSTRUCTIONS:
         const errPayload = await response.json().catch(() => ({}))
         const errorMsg = errPayload.error?.message || `HTTP ${response.status}`
         logger.warn(`LLM model ${modelName} returned ${response.status}: ${errorMsg}. Trying next candidate...`)
-        continue
+        // Retry only when the configured model is missing. Auth, quota and
+        // server errors will not improve by cycling through model aliases.
+        if (response.status === 404) continue
+        lastError = new Error(errorMsg)
+        break
       }
 
       const payload = await response.json()

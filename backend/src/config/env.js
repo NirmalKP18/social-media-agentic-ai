@@ -19,9 +19,12 @@ export const config = {
   },
   llm: {
     apiKey: process.env.GEMINI_API_KEY || '',
-    model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-flash-latest',
     baseUrl: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta',
-    timeoutMs: Number(process.env.LLM_TIMEOUT_MS) || 15000,
+    // This is a total generation budget, not a per-model timeout. Keeping it
+    // short prevents the final pipeline stage from appearing stuck when the
+    // provider is unavailable.
+    timeoutMs: Number(process.env.LLM_TIMEOUT_MS) || 8000,
   },
   pythonService: {
     url: process.env.PYTHON_SERVICE_URL || `http://127.0.0.1:${Number(process.env.PYTHON_SERVICE_PORT) || 8000}`,
