@@ -82,21 +82,26 @@ function LivePreviewPage() {
 
   return (
     <PageContainer>
-      <div className="landing-page">
+      <div className="landing-page public-detail-page public-preview-page">
         {/* Header Banner */}
-        <div className="section-header" style={{ marginTop: '24px' }}>
+        <div className="section-header public-detail-hero">
           <span className="section-tag">
             <Icon name="sparkles" size={14} /> Interactive Sandbox
           </span>
           <h1 className="section-title">Live Platform Preview</h1>
           <p className="section-subtitle">
-            Explore how SignalOS autonomously analyzes post captions, comment sentiment, and PR response workflows in real-time.
+            Explore how SignalOS analyzes post captions, comment sentiment, evidence retrieval, and governed response workflows.
           </p>
+          <div className="public-detail-hero__trust">
+            <span><Icon name="check" size={14} /> No account required</span>
+            <span><Icon name="shield" size={14} /> Human-governed outputs</span>
+            <span><Icon name="bolt" size={14} /> Interactive product tour</span>
+          </div>
         </div>
 
         {/* Live Interactive Tab System */}
         <section className="landing-section">
-          <div className="interactive-showcase">
+          <div className="interactive-showcase public-showcase-shell">
             <div className="showcase-tabs">
               {SHOWCASE_TABS.map((tab) => (
                 <button
@@ -309,7 +314,7 @@ function LivePreviewPage() {
 
         {/* Semantic Query Simulator */}
         <section className="landing-section">
-          <div className="demo-card" style={{ padding: '36px', background: '#ffffff' }}>
+          <div className="demo-card public-rag-simulator">
             <div className="section-header" style={{ marginBottom: '24px' }}>
               <span className="section-tag"><Icon name="retrieval" size={14} /> Semantic RAG Simulator</span>
               <h2>Test Vector Search Across Posts &amp; Comments</h2>
@@ -349,7 +354,7 @@ function LivePreviewPage() {
           <div className="landing-cta-banner">
             <div className="cta-banner__content">
               <h2>Ready to Experience Full Autonomous Social AI?</h2>
-              <p>Sign up in 30 seconds and connect your accounts to start receiving multi-agent intelligence.</p>
+              <p>Create a workspace, define a monitoring profile, and start turning approved social data into multi-agent intelligence.</p>
               <div className="cta-buttons">
                 <Link to={ROUTES.register} className="btn-large-primary">
                   Start Free Analysis <span>→</span>

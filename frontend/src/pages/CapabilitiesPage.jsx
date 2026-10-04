@@ -9,7 +9,7 @@ const AGENT_PIPELINE = [
     name: 'Collection & Ingestion Agent',
     badge: 'Async Queue & Deduplication',
     desc: 'Ingests social posts, reels, video captions, comment threads, reply hierarchies, like counts, and shares across multi-platform sources.',
-    tech: 'FastAPI • Pydantic V2 • Background Celery Workers',
+    tech: 'FastAPI • Pydantic • Normalization & Deduplication',
     color: '#0ea5e9',
     icon: 'collection',
   },
@@ -18,14 +18,14 @@ const AGENT_PIPELINE = [
     name: 'NLP & Emotion Extraction Agent',
     badge: 'Dual-Layer Sentiment & Emotion',
     desc: 'Scores post sentiment from -1.0 to +1.0, tags 8 fundamental emotions (Joy, Trust, Fear, Anger, Surprise, Sadness, Disgust, Anticipation), and performs Named Entity Recognition (NER).',
-    tech: 'Transformer NLP • VADER / RoBERTa • Entity Spans',
+    tech: 'Sentiment • Intent • Emotion • Entity Extraction',
     color: '#8b5cf6',
     icon: 'brain',
   },
   {
     step: 'Agent 03',
     name: 'Vector RAG Indexing Agent',
-    badge: 'Sub-350ms Semantic Search',
+    badge: 'Semantic Evidence Retrieval',
     desc: 'Generates high-dimensional vector embeddings for all posts, captions, and comments. Enables instant semantic retrieval and historical cluster matching.',
     tech: 'SentenceTransformers • Cosine Similarity • Vector Index',
     color: '#10b981',
@@ -36,7 +36,7 @@ const AGENT_PIPELINE = [
     name: 'Grounded PR & Report Agent',
     badge: 'Grounded Synthesis & Defense',
     desc: 'Synthesizes executive reports, anomaly warnings, and grounded PR response statements backed by post citations with strict prompt injection guardrails.',
-    tech: 'Gemini / Claude / GPT-4 • Citation RAG • Guardrails',
+    tech: 'Gemini or Local Fallback • Evidence Context • Guardrails',
     color: '#f95738',
     icon: 'insights',
   },
@@ -51,12 +51,12 @@ const CAPABILITY_LIST = [
   {
     icon: 'brain',
     title: 'Granular Sentiment & Emotion',
-    desc: 'Deep NLP sentiment analysis accurate to +0.88 with granular emotion probability breakdowns across all audience reactions.',
+    desc: 'Deep NLP sentiment scoring with granular emotion probability breakdowns across audience reactions.',
   },
   {
     icon: 'retrieval',
     title: 'SentenceTransformers Vector RAG',
-    desc: 'Lightning-fast semantic queries across hundreds of thousands of historical comments in under 350ms.',
+    desc: 'Semantic queries across historical comments and approved knowledge using local embeddings with lexical fallback.',
   },
   {
     icon: 'shield',
@@ -78,35 +78,40 @@ const CAPABILITY_LIST = [
 function CapabilitiesPage() {
   return (
     <PageContainer>
-      <div className="landing-page">
+      <div className="landing-page public-detail-page public-capabilities-page">
         {/* Header */}
-        <div className="section-header" style={{ marginTop: '24px' }}>
+        <div className="section-header public-detail-hero">
           <span className="section-tag">
             <Icon name="bolt" size={14} /> Technical Architecture
           </span>
           <h1 className="section-title">Platform Capabilities &amp; Multi-Agent AI</h1>
           <p className="section-subtitle">
-            An enterprise-grade autonomous intelligence architecture engineered for high-throughput post, comment, and sentiment evaluation.
+            A governed multi-agent intelligence architecture for structured post, comment, and sentiment evaluation.
           </p>
+          <div className="public-detail-hero__trust">
+            <span><Icon name="shield" size={14} /> Human approval</span>
+            <span><Icon name="knowledge" size={14} /> Source-grounded output</span>
+            <span><Icon name="logs" size={14} /> Traceable agent runs</span>
+          </div>
         </div>
 
         {/* Metrics Overview */}
         <section className="metrics-strip">
           <div className="metric-box">
-            <strong>99.4%</strong>
-            <small>Sentiment &amp; Emotion Precision</small>
+            <strong>6 signals</strong>
+            <small>Sentiment, emotion, intent, priority, entities &amp; topics</small>
           </div>
           <div className="metric-box">
-            <strong>&lt; 350ms</strong>
-            <small>Vector RAG Retrieval Speed</small>
+            <strong>Hybrid RAG</strong>
+            <small>Semantic embeddings with lexical fallback</small>
           </div>
           <div className="metric-box">
             <strong>4 Agents</strong>
             <small>Autonomous Collaborative Network</small>
           </div>
           <div className="metric-box">
-            <strong>100%</strong>
-            <small>Grounded Evidence Verification</small>
+            <strong>Human review</strong>
+            <small>Approval required before any response action</small>
           </div>
         </section>
 
@@ -115,21 +120,15 @@ function CapabilitiesPage() {
           <div className="section-header">
             <span className="section-tag"><Icon name="dashboard" size={14} /> Autonomous Workflow</span>
             <h2>The 4-Agent Sequential Pipeline</h2>
-            <p>Every post and comment flows through specialized agents for verified, hallucination-free intelligence.</p>
+            <p>Every post and comment flows through specialized agents for traceable, evidence-grounded intelligence.</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+          <div className="capability-agent-grid">
             {AGENT_PIPELINE.map((agent) => (
               <div
                 key={agent.step}
-                className="demo-card"
-                style={{
-                  background: '#ffffff',
-                  borderTop: `4px solid ${agent.color}`,
-                  padding: '28px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
+                className="demo-card capability-agent-card"
+                style={{ '--agent-color': agent.color }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                   <span style={{ fontSize: '0.78rem', fontWeight: 800, color: agent.color, textTransform: 'uppercase', letterSpacing: '.08em' }}>
@@ -152,7 +151,7 @@ function CapabilitiesPage() {
                 </p>
 
                 <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px', fontSize: '0.78rem', color: '#94a3b8', fontFamily: 'monospace' }}>
-                  ⚙️ {agent.tech}
+                  {agent.tech}
                 </div>
               </div>
             ))}
